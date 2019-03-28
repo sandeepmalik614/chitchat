@@ -1,0 +1,315 @@
+package chat.chitchat.activity;
+
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.viewpager.widget.ViewPager;
+import chat.chitchat.R;
+import chat.chitchat.adapter.ViewPagerAdapter;
+import chat.chitchat.fragment.ChatFragment;
+import chat.chitchat.fragment.FriendRequestFragment;
+import chat.chitchat.fragment.FriendsFragment;
+import chat.chitchat.helper.AppConstant;
+import chat.chitchat.model.Chat;
+import chat.chitchat.model.TokenList;
+
+import static chat.chitchat.helper.AppConstant.chatTableName;
+import static chat.chitchat.helper.AppConstant.mobileTableName;
+import static chat.chitchat.helper.AppConstant.tokenTableName;
+import static chat.chitchat.helper.AppPrefrences.getFirebaseToken;
+import static chat.chitchat.helper.AppPrefrences.setUserLoggedOut;
+import static chat.chitchat.helper.AppPrefrences.setUserName;
+import static chat.chitchat.helper.AppUtils.getMyPrettyDate;
+import static chat.chitchat.helper.AppUtils.userStatus;
+
+public class MainActivity extends AppCompatActivity {
+
+    private TabLayout tabLayout;
+    private ViewPager viewPager;
+    private ViewPagerAdapter viewPagerAdapter;
+    private FirebaseUser firebaseUser;
+    private DatabaseReference reference;
+    private boolean isUserLoggedOut = false, onDoubleBackPressed = false;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        Toolbar toolbar = findViewById(R.id.maintoolbar);
+        setSupportActionBar(toolbar);
+
+        tabLayout = findViewById(R.id.tabLayout);
+        viewPager = findViewById(R.id.viewPager);
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            Toast.makeText(this, "Your session is expired, Please login again", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(MainActivity.this, LoginActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+            finish();
+            setUserLoggedOut(MainActivity.this, true);
+        } else {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    matchToken();
+                }
+            }, 100);
+        }
+    }
+
+    private void matchToken() {
+        reference = FirebaseDatabase.getInstance().getReference(tokenTableName).child(firebaseUser.getUid());
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+                if (!isUserLoggedOut) {
+                    TokenList tokenList = dataSnapshot.getValue(TokenList.class);
+                    try {
+                        if (!tokenList.getToken().equals(getFirebaseToken(MainActivity.this))) {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                            builder.setCancelable(false);
+                            builder.setTitle("Already Login");
+                            builder.setMessage("You have been logged in on another device");
+                            builder.setPositiveButton("Logout", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                    startActivity(new Intent(MainActivity.this, LoginActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                                    finish();
+                                    setUserLoggedOut(MainActivity.this, true);
+                                }
+                            });
+                            builder.show();
+                        } else {
+                            getUserDetails();
+                        }
+                    }catch (Exception e){
+                        matchToken();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void getUserDetails() {
+        if (firebaseUser == null) {
+            Toast.makeText(this, "Your session is expired, Please login again", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, LoginActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+            finish();
+            setUserLoggedOut(this, true);
+        } else {
+            reference = FirebaseDatabase.getInstance().getReference(chatTableName);
+            viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+            viewPagerAdapter.addFragment(new FriendRequestFragment(), "Request");
+            viewPagerAdapter.addFragment(new ChatFragment(), "Chat");
+            viewPagerAdapter.addFragment(new FriendsFragment(), "Friend");
+            viewPager.setAdapter(viewPagerAdapter);
+            tabLayout.setupWithViewPager(viewPager);
+            reference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    int unread = 0;
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        Chat chat = snapshot.getValue(Chat.class);
+                        if (chat.getReceiver().equals(firebaseUser.getUid()) && !chat.isIsseen()) {
+                            unread++;
+                        }
+                    }
+
+                    if (unread == 0) {
+                        tabLayout.getTabAt(1).setText("Chat");
+                    } else {
+                        tabLayout.getTabAt(1).setText("(" + unread + ")Chat");
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+            reference = FirebaseDatabase.getInstance().getReference().child(AppConstant.profileNameTable)
+                    .child(firebaseUser.getUid());
+
+            reference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    setUserName(MainActivity.this, dataSnapshot.child("userName").getValue().toString());
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+            reference = FirebaseDatabase.getInstance().getReference().child(AppConstant.friendRequestTableName)
+                    .child(firebaseUser.getUid());
+
+            reference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    int unRespond = 0;
+                    if (dataSnapshot != null) {
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                            unRespond++;
+                        }
+                        if (unRespond != 0) {
+                            tabLayout.getTabAt(0).setText("(" + unRespond + ")" + " Request");
+                        } else {
+                            tabLayout.getTabAt(0).setText("Request");
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        super.onOptionsItemSelected(item);
+        switch (item.getItemId()) {
+            case R.id.logout:
+                userStatus("logout");
+                updateMobileList();
+                clearTokenFromDatabse();
+                isUserLoggedOut = true;
+                FirebaseAuth.getInstance().signOut();
+                firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+                startActivity(new Intent(this, LoginActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                finish();
+                setUserLoggedOut(this, true);
+                return true;
+
+            case R.id.profile:
+                startActivity(new Intent(this, ProfileActivity.class));
+                return true;
+
+            case R.id.blockList:
+                startActivity(new Intent(this, BlockedUserActivity.class));
+                return true;
+
+            case R.id.newGroup:
+                startActivity(new Intent(this, CreateGroupActivity.class));
+                return true;
+        }
+
+        return true;
+    }
+
+    private void deleteAccount() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        user.delete()
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            startActivity(new Intent(MainActivity.this, LoginActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                            finish();
+                            setUserLoggedOut(MainActivity.this, true);
+                            Toast.makeText(MainActivity.this, "Your Account is deleted successfully", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(MainActivity.this, LoginActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                            finish();
+                            setUserLoggedOut(MainActivity.this, true);
+                        } else {
+                            Toast.makeText(MainActivity.this, "Your Account is not deleted", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
+    private void updateMobileList() {
+        final DatabaseReference mMobileReference = FirebaseDatabase.getInstance().getReference(mobileTableName)
+                .child(firebaseUser.getUid());
+
+        mMobileReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot != null) {
+                    mMobileReference.child("status").setValue("logout");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void clearTokenFromDatabse() {
+        final DatabaseReference mTokenReference = FirebaseDatabase.getInstance().getReference(tokenTableName)
+                .child(firebaseUser.getUid());
+        mTokenReference.removeValue();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (onDoubleBackPressed) {
+            finish();
+            super.onBackPressed();
+        } else {
+            Toast.makeText(this, "Please Back again to exit", Toast.LENGTH_SHORT).show();
+            onDoubleBackPressed = true;
+        }
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                onDoubleBackPressed = false;
+            }
+        }, 2000);
+    }
+
+    @Override
+    protected void onStart() {
+        userStatus("online");
+        super.onStart();
+    }
+
+    @Override
+    protected void onUserLeaveHint() {
+        if (!isUserLoggedOut) {
+            userStatus(String.valueOf(getMyPrettyDate(System.currentTimeMillis())));
+        }
+        super.onUserLeaveHint();
+    }
+}

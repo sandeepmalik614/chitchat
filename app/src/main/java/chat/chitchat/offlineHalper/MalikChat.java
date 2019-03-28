@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Intent;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -13,6 +14,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import androidx.annotation.NonNull;
 import chat.chitchat.activity.LoginActivity;
+import io.fabric.sdk.android.Fabric;
 
 import static chat.chitchat.helper.AppConstant.onlineStatusTable;
 import static chat.chitchat.helper.AppPrefrences.isUserLoggedOut;
@@ -27,7 +29,7 @@ public class MalikChat extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-//        Fabric.with(this, new Crashlytics());
+        Fabric.with(this, new Crashlytics());
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
         mAuth = FirebaseAuth.getInstance();

@@ -160,7 +160,9 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                 friendsMap.put(userFriendListTableName + "/" + currentUserId + "/" + userId + "/friend_id", userId);
+                friendsMap.put(userFriendListTableName + "/" + currentUserId + "/" + userId + "/acceptDate", String.valueOf(System.currentTimeMillis()));
                 friendsMap.put(userFriendListTableName + "/" + userId + "/" + currentUserId + "/friend_id", currentUserId);
+                friendsMap.put(userFriendListTableName + "/" + userId + "/" + currentUserId + "/acceptDate", String.valueOf(System.currentTimeMillis()));
 
                 friendsMap.put(friendRequestTableName + "/" + currentUserId + "/" + userId, null);
                 friendsMap.put(friendRequestTableName + "/" + userId + "/" + currentUserId, null);

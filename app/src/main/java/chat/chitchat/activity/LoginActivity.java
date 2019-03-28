@@ -75,7 +75,6 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
     }
-
     private void isMobileRegistered(final String phone) {
         mMobileReference = FirebaseDatabase.getInstance().getReference(mobileTableName);
         final ArrayList<RegisteredMobileNumbers> mobileLists = new ArrayList<>();

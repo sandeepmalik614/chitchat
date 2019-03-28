@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -25,6 +26,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import chat.chitchat.R;
 import chat.chitchat.adapter.FriendRequestAdapter;
 import chat.chitchat.helper.AppConstant;
+import chat.chitchat.helper.AppUtils;
 import chat.chitchat.model.RequestList;
 
 
@@ -59,6 +61,10 @@ public class FriendRequestFragment extends Fragment {
         mCurrentUserId = mAuth.getUid();
         mFriendsDatabse = FirebaseDatabase.getInstance().getReference().child(AppConstant.friendRequestTableName)
                 .child(mCurrentUserId);
+
+        if(!AppUtils.isConnectionAvailable(getActivity())) {
+            Toast.makeText(getActivity(), "Please check your internet connection", Toast.LENGTH_SHORT).show();
+        }
 
         mUserDatabase = FirebaseDatabase.getInstance().getReference();
 

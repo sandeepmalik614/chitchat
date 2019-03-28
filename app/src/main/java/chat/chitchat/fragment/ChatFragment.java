@@ -8,7 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.dynamic.IFragmentWrapper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -27,7 +29,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import chat.chitchat.R;
 import chat.chitchat.adapter.ChatsAdapter;
+import chat.chitchat.helper.AppUtils;
 import chat.chitchat.model.ChatList;
+import io.fabric.sdk.android.services.common.SafeToast;
 
 import static chat.chitchat.helper.AppConstant.chatListTableName;
 
@@ -63,6 +67,11 @@ public class ChatFragment extends Fragment {
         userList = new ArrayList<>();
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
+
+        if(!AppUtils.isConnectionAvailable(getActivity())) {
+            Toast.makeText(getActivity(), "Please check your internet connection", Toast.LENGTH_SHORT).show();
+        }
+
         mChatReference = FirebaseDatabase.getInstance().getReference(chatListTableName)
                 .child(firebaseUser.getUid());
         Query query = mChatReference.orderByChild("time");

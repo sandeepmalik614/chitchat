@@ -40,6 +40,7 @@ import chat.chitchat.activity.AllUserActivity;
 import chat.chitchat.activity.MessageActivity;
 import chat.chitchat.adapter.FriendsAdapter;
 import chat.chitchat.adapter.SuggestionAdapter;
+import chat.chitchat.helper.AppUtils;
 import chat.chitchat.listner.BlockClickListner;
 import chat.chitchat.listner.FriendClickListner;
 import chat.chitchat.model.BlockedUserList;
@@ -117,6 +118,10 @@ public class FriendsFragment extends Fragment {
         friendRequestIdList = new ArrayList<>();
 
         profileDialog = new Dialog(getActivity());
+
+        if(!AppUtils.isConnectionAvailable(getActivity())) {
+            Toast.makeText(getActivity(), "Please check your internet connection", Toast.LENGTH_SHORT).show();
+        }
 
         btn_find.setOnClickListener(new View.OnClickListener() {
             @Override

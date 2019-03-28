@@ -1,5 +1,6 @@
 package chat.chitchat.helper;
 
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -269,6 +270,11 @@ public class AppUtils {
             }
         }
         return number;
+    }
+
+    public static void clearNotification(Context context){
+        NotificationManager notificationManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancelAll();
     }
 
     public static void sendNotification(final Context context, final String header,final String currentUserId, final String receiver, final String username, final String msg) {

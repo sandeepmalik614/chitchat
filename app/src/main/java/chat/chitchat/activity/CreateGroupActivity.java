@@ -88,7 +88,7 @@ public class CreateGroupActivity extends AppCompatActivity {
 
         friendsList = new ArrayList<>();
         mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        mUserReferance = FirebaseDatabase.getInstance().getReference(userTableName);
+        mUserReferance = FirebaseDatabase.getInstance().getReference();
         mFriendsReference = FirebaseDatabase.getInstance().getReference(userFriendListTableName)
                 .child(mFirebaseUser.getUid());
 

@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import chat.chitchat.R;
+import chat.chitchat.helper.AppConstant;
 import chat.chitchat.listner.FriendClickListner;
 import chat.chitchat.model.ParticipantList;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -46,12 +47,34 @@ public class AddGroupAllFriendsAdapter extends RecyclerView.Adapter<AddGroupAllF
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int pos) {
-        mUserDatabase.child(participantLists.get(pos).getFriend_id()).addValueEventListener(new ValueEventListener() {
+        mUserDatabase.child(AppConstant.profileNameTable).child(participantLists.get(pos).getFriend_id()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                holder.userName.setText(dataSnapshot.child("userName").getValue().toString());
+                participantLists.get(pos).setName(dataSnapshot.child("userName").getValue().toString());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        mUserDatabase.child(AppConstant.profileAboutTable).child(participantLists.get(pos).getFriend_id()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 holder.userStatus.setText(dataSnapshot.child("userStatus").getValue().toString());
-                holder.userName.setText(dataSnapshot.child("userName").getValue().toString());
-                participantLists.get(pos).setName(dataSnapshot.child("userName").getValue().toString());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        mUserDatabase.child(AppConstant.profileImageTable).child(participantLists.get(pos).getFriend_id()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Glide.with(context).load(dataSnapshot.child("imageUrl").getValue().toString()).into(holder.userImage);
                 participantLists.get(pos).setImage(dataSnapshot.child("imageUrl").getValue().toString());
             }
@@ -61,6 +84,7 @@ public class AddGroupAllFriendsAdapter extends RecyclerView.Adapter<AddGroupAllF
 
             }
         });
+
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

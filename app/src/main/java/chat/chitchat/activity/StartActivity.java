@@ -3,11 +3,15 @@ package chat.chitchat.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.widget.Toast;
 
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import androidx.appcompat.app.AppCompatActivity;
 import chat.chitchat.R;
+import io.fabric.sdk.android.services.common.SafeToast;
 
 import static chat.chitchat.helper.AppPrefrences.isUserLoggedOut;
 
@@ -18,6 +22,7 @@ public class StartActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
         FirebaseApp.initializeApp(this);
+
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {

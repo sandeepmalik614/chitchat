@@ -38,6 +38,8 @@ import retrofit2.Response;
 import static chat.chitchat.helper.AppConstant.BASE_URL;
 import static chat.chitchat.helper.AppConstant.onlineStatusTable;
 import static chat.chitchat.helper.AppConstant.profileAboutTable;
+import static chat.chitchat.helper.AppConstant.profileGroupImageTable;
+import static chat.chitchat.helper.AppConstant.profileGroupNameTable;
 import static chat.chitchat.helper.AppConstant.profileImageTable;
 import static chat.chitchat.helper.AppConstant.profileNameTable;
 import static chat.chitchat.helper.AppConstant.tokenTableName;
@@ -69,12 +71,34 @@ public class AppUtils {
         }
     }
 
-    public static void updateUserImage(String status) {
+    public static void updateUserImage(String url) {
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference(profileImageTable).child(firebaseUser.getUid());
         try {
             HashMap<String, Object> hashMap = new HashMap<>();
-            hashMap.put("imageUrl", status);
+            hashMap.put("imageUrl", url);
+            reference.updateChildren(hashMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void updateGroupName(String name, String groupId){
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference(profileGroupNameTable).child(groupId);
+        try {
+            HashMap<String, Object> hashMap = new HashMap<>();
+            hashMap.put("groupName", name);
+            reference.updateChildren(hashMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void updateGroupImage(String url, String groupId){
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference(profileGroupImageTable).child(groupId);
+        try {
+            HashMap<String, Object> hashMap = new HashMap<>();
+            hashMap.put("imageUrl", url);
             reference.updateChildren(hashMap);
         } catch (Exception e) {
             e.printStackTrace();

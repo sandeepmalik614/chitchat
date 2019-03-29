@@ -95,6 +95,13 @@ public class CreateGroupActivity extends AppCompatActivity {
         tv_next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                for (int i = 0; i < friendsList.size(); ) {
+                    if(!friendsList.get(i).isSelected()){
+                        friendsList.remove(i);
+                    }else{
+                        i++;
+                    }
+                }
                 Intent intent = new Intent(CreateGroupActivity.this, CreateGroupSecoundActivity.class);
                 intent.putExtra("participantList", friendsList);
                 startActivity(intent);

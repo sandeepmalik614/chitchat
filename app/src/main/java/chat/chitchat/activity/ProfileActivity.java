@@ -36,6 +36,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import chat.chitchat.R;
+import chat.chitchat.helper.AppPrefrences;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import static chat.chitchat.helper.AppConstant.profileAboutTable;
@@ -173,6 +174,7 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Glide.with(getApplicationContext()).load(dataSnapshot.child("imageUrl").getValue().toString()).into(userImage);
+                AppPrefrences.setUserImage(ProfileActivity.this, dataSnapshot.child("imageUrl").getValue().toString());
                 if (dataSnapshot.child("imageUrl").getValue().toString().equals("default")) {
                     isProfileImage = false;
                 } else {
@@ -318,7 +320,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-        userStatus(String.valueOf(getMyPrettyDate(System.currentTimeMillis())));
+        userStatus(String.valueOf(System.currentTimeMillis()));
         super.onPause();
     }
 

@@ -4,7 +4,7 @@
     package="chat.chitchat">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    
+
     <application
         android:name=".offlineHalper.MalikChat"
         android:allowBackup="false"
@@ -14,7 +14,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-
         <activity
             android:name=".activity.MainActivity"
             android:screenOrientation="portrait" />
@@ -58,17 +57,20 @@
         <activity
             android:name=".activity.BlockedUserActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.CreateGroupActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.CreateGroupSecoundActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.AllUserActivity"
+            android:screenOrientation="portrait" />
 
-        <activity android:name=".activity.CreateGroupActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".activity.CreateGroupSecoundActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".activity.AllUserActivity"
-            android:screenOrientation="portrait"></activity>
-        
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="f2901f9ce4c70de49dccdb1fd55b07701e091a1e" />
+
     </application>
 
 </manifest>

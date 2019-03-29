@@ -48,6 +48,7 @@ import static chat.chitchat.helper.AppConstant.profileImageTable;
 import static chat.chitchat.helper.AppConstant.profileNameTable;
 import static chat.chitchat.helper.AppConstant.userFriendListTableName;
 import static chat.chitchat.helper.AppUtils.getMyPrettyDate;
+import static chat.chitchat.helper.AppUtils.getMyPrettyOnlyDate;
 import static chat.chitchat.helper.AppUtils.sendNotification;
 import static chat.chitchat.helper.AppUtils.userStatus;
 
@@ -250,7 +251,14 @@ public class MessageActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() != null) {
-                    status.setText(dataSnapshot.child("status").getValue().toString());
+                    if(dataSnapshot.child("status").getValue().toString().equals("online") ||
+                            dataSnapshot.child("status").getValue().toString().equals("logout") ||
+                            dataSnapshot.child("status").getValue().toString().equals("typing...") ||
+                            dataSnapshot.child("status").getValue().toString().equals("login")){
+                        status.setText(dataSnapshot.child("status").getValue().toString());
+                    }else{
+                        status.setText(getMyPrettyDate(Long.parseLong(dataSnapshot.child("status").getValue().toString())));
+                    }
                 }
             }
 
@@ -468,7 +476,7 @@ public class MessageActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         reference.removeEventListener(seenListener);
-        userStatus(String.valueOf(getMyPrettyDate(System.currentTimeMillis())));
+        userStatus(String.valueOf(System.currentTimeMillis()));
         currentUser("none");
     }
 }

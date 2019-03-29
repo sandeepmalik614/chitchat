@@ -43,7 +43,7 @@ public class MalikChat extends Application {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if (dataSnapshot != null) {
-                            mUserDatabase.child("status").onDisconnect().setValue(String.valueOf(getMyPrettyDate(System.currentTimeMillis())));
+                            mUserDatabase.child("status").onDisconnect().setValue(String.valueOf(System.currentTimeMillis()));
                         }
                     }
 

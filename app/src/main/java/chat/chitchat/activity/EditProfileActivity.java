@@ -76,7 +76,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-        userStatus(String.valueOf(getMyPrettyDate(System.currentTimeMillis())));
+        userStatus(String.valueOf(System.currentTimeMillis()));
         super.onPause();
     }
 }

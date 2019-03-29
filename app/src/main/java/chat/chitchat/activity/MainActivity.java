@@ -30,6 +30,7 @@ import chat.chitchat.fragment.ChatFragment;
 import chat.chitchat.fragment.FriendRequestFragment;
 import chat.chitchat.fragment.FriendsFragment;
 import chat.chitchat.helper.AppConstant;
+import chat.chitchat.helper.AppPrefrences;
 import chat.chitchat.model.Chat;
 import chat.chitchat.model.TokenList;
 
@@ -161,6 +162,21 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     setUserName(MainActivity.this, dataSnapshot.child("userName").getValue().toString());
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+            reference = FirebaseDatabase.getInstance().getReference().child(AppConstant.profileImageTable)
+                    .child(firebaseUser.getUid());
+
+            reference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    AppPrefrences.setUserImage(MainActivity.this, dataSnapshot.child("imageUrl").getValue().toString());
                 }
 
                 @Override
@@ -308,7 +324,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onUserLeaveHint() {
         if (!isUserLoggedOut) {
-            userStatus(String.valueOf(getMyPrettyDate(System.currentTimeMillis())));
+            userStatus(String.valueOf(System.currentTimeMillis()));
         }
         super.onUserLeaveHint();
     }

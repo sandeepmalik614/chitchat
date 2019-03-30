@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -41,11 +43,13 @@ import static chat.chitchat.helper.AppPrefrences.getFirebaseToken;
 import static chat.chitchat.helper.AppPrefrences.setUserLoggedOut;
 import static chat.chitchat.helper.AppPrefrences.setUserName;
 import static chat.chitchat.helper.AppUtils.getMyPrettyDate;
+import static chat.chitchat.helper.AppUtils.isConnectionAvailable;
 import static chat.chitchat.helper.AppUtils.userStatus;
 
 public class MainActivity extends AppCompatActivity {
 
     private TabLayout tabLayout;
+    private TextView tv_noInternet;
     private ViewPager viewPager;
     private ViewPagerAdapter viewPagerAdapter;
     private FirebaseUser firebaseUser;
@@ -62,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
 
         tabLayout = findViewById(R.id.tabLayout);
         viewPager = findViewById(R.id.viewPager);
+        tv_noInternet = findViewById(R.id.tv_noInternet);
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             Toast.makeText(this, "Your session is expired, Please login again", Toast.LENGTH_SHORT).show();
@@ -76,6 +81,22 @@ public class MainActivity extends AppCompatActivity {
                 }
             }, 100);
         }
+
+        startInternetCycle();
+    }
+
+    private void startInternetCycle(){
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if(isConnectionAvailable(MainActivity.this)){
+                    tv_noInternet.setVisibility(View.GONE);
+                }else{
+                    tv_noInternet.setVisibility(View.VISIBLE);
+                }
+                startInternetCycle();
+            }
+        }, 1500);
     }
 
     private void matchToken() {

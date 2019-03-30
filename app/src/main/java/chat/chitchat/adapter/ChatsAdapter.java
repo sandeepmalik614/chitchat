@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import chat.chitchat.R;
+import chat.chitchat.activity.GroupProfile;
 import chat.chitchat.activity.UserMessageActivity;
 import chat.chitchat.model.Chat;
 import chat.chitchat.model.ChatList;
@@ -69,13 +70,15 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent intent = null;
                 if (users.get(position).getIsGroup().equals("true")) {
-                    Toast.makeText(context, "This is group", Toast.LENGTH_SHORT).show();
+                    intent = new Intent(context, GroupProfile.class);
                 } else {
-                    Intent intent = new Intent(context, UserMessageActivity.class);
-                    intent.putExtra("userid", users.get(position).getId());
-                    context.startActivity(intent);
+                    intent = new Intent(context, UserMessageActivity.class);
                 }
+
+                intent.putExtra("userid", users.get(position).getId());
+                context.startActivity(intent);
             }
         });
     }

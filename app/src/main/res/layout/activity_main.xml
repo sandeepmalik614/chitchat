@@ -63,10 +63,27 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.viewpager.widget.ViewPager
-        android:id="@+id/viewPager"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/tv_noInternet"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:background="#636363"
+            android:text="No Internet Connection"
+            android:textColor="@android:color/white"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:elevation="6dp"
+            android:visibility="gone"/>
+
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+    </RelativeLayout>
 
 </LinearLayout>

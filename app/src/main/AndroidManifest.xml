@@ -30,7 +30,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.MessageActivity"
+            android:name=".activity.UserMessageActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activity.ProfileActivity"
@@ -71,6 +71,7 @@
             android:name="io.fabric.ApiKey"
             android:value="f2901f9ce4c70de49dccdb1fd55b07701e091a1e" />
 
+        <activity android:name=".activity.GroupProfile"></activity>
     </application>
 
 </manifest>

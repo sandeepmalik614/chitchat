@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
@@ -22,23 +23,26 @@ import java.util.ArrayList;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import chat.chitchat.R;
-import chat.chitchat.activity.MessageActivity;
+import chat.chitchat.activity.UserMessageActivity;
 import chat.chitchat.model.Chat;
+import chat.chitchat.model.ChatList;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import static chat.chitchat.helper.AppConstant.chatTableName;
 import static chat.chitchat.helper.AppConstant.onlineStatusTable;
+import static chat.chitchat.helper.AppConstant.profileGroupImageTable;
+import static chat.chitchat.helper.AppConstant.profileGroupNameTable;
 import static chat.chitchat.helper.AppConstant.profileImageTable;
 import static chat.chitchat.helper.AppConstant.profileNameTable;
 
 public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> {
 
     private Context context;
-    private ArrayList<String> users;
+    private ArrayList<ChatList> users;
     private DatabaseReference mDatabaseReference;
     private String theLastMessage;
 
-    public ChatsAdapter(Context context, ArrayList<String> users, DatabaseReference mDatabaseReference) {
+    public ChatsAdapter(Context context, ArrayList<ChatList> users, DatabaseReference mDatabaseReference) {
         this.context = context;
         this.users = users;
         this.mDatabaseReference = mDatabaseReference;
@@ -54,63 +58,24 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull final ChatsAdapter.ViewHolder holder, final int position) {
 
-        mDatabaseReference.child(profileNameTable).child(users.get(position)).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                holder.userName.setText(dataSnapshot.child("userName").getValue().toString());
-            }
+        if (users.get(position).getIsGroup().equals("true")) {
+            getGroupInfo(users.get(position).getId(), holder);
+        } else {
+            getUserInfo(users.get(position).getId(), holder);
+        }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-        mDatabaseReference.child(profileImageTable).child(users.get(position)).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot.child("imageUrl").getValue().toString().equals("default")){
-                    holder.userImage.setBackgroundResource(R.drawable.ic_user);
-                }else{
-                    Glide.with(context).load(dataSnapshot.child("imageUrl").getValue().toString()).into(holder.userImage);
-                }
-
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-        mDatabaseReference.child(onlineStatusTable).child(users.get(position)).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue() != null) {
-                    if (dataSnapshot.child("status").getValue().toString().equals("online")
-                            || dataSnapshot.child("status").getValue().toString().equals("typing...")) {
-                        holder.status.setVisibility(View.VISIBLE);
-                    } else {
-                        holder.status.setVisibility(View.GONE);
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-        lastMessage(users.get(position), holder);
+        lastMessage(users.get(position).getId(), holder);
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(context, MessageActivity.class);
-                intent.putExtra("userid", users.get(position));
-                context.startActivity(intent);
+                if (users.get(position).getIsGroup().equals("true")) {
+                    Toast.makeText(context, "This is group", Toast.LENGTH_SHORT).show();
+                } else {
+                    Intent intent = new Intent(context, UserMessageActivity.class);
+                    intent.putExtra("userid", users.get(position).getId());
+                    context.startActivity(intent);
+                }
             }
         });
     }
@@ -138,6 +103,88 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
         }
     }
 
+    private void getUserInfo(String id, final ViewHolder holder) {
+        mDatabaseReference.child(profileNameTable).child(id).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                holder.userName.setText(dataSnapshot.child("userName").getValue().toString());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        mDatabaseReference.child(profileImageTable).child(id).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.child("imageUrl").getValue().toString().equals("default")) {
+                    holder.userImage.setBackgroundResource(R.drawable.ic_user);
+                } else {
+                    Glide.with(context).load(dataSnapshot.child("imageUrl").getValue().toString()).into(holder.userImage);
+                }
+
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        mDatabaseReference.child(onlineStatusTable).child(id).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null) {
+                    if (dataSnapshot.child("status").getValue().toString().equals("online")
+                            || dataSnapshot.child("status").getValue().toString().equals("typing...")) {
+                        holder.status.setVisibility(View.VISIBLE);
+                    } else {
+                        holder.status.setVisibility(View.GONE);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void getGroupInfo(String id, final ViewHolder holder) {
+        mDatabaseReference.child(profileGroupNameTable).child(id).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                holder.userName.setText(dataSnapshot.child("groupName").getValue().toString());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        mDatabaseReference.child(profileGroupImageTable).child(id).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.child("groupImageUrl").getValue().toString().equals("default")) {
+                    holder.userImage.setBackgroundResource(R.drawable.ic_group);
+                } else {
+                    Glide.with(context).load(dataSnapshot.child("groupImageUrl").getValue().toString()).into(holder.userImage);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
     private void lastMessage(final String userId, final ViewHolder holder) {
         theLastMessage = "default";
         final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -162,7 +209,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
                                 } else {
                                     holder.unreadView.setVisibility(View.VISIBLE);
                                     holder.unreadText.setVisibility(View.VISIBLE);
-                                    unreadMsg = (unreadMsg+1);
+                                    unreadMsg = (unreadMsg + 1);
                                     holder.unreadText.setText(String.valueOf(unreadMsg));
                                     holder.userName.setTypeface(holder.userName.getTypeface(), Typeface.BOLD);
                                     holder.lastMsg.setTypeface(holder.lastMsg.getTypeface(), Typeface.BOLD);

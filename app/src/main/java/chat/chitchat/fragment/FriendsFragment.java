@@ -37,7 +37,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import chat.chitchat.R;
 import chat.chitchat.activity.AllUserActivity;
-import chat.chitchat.activity.MessageActivity;
+import chat.chitchat.activity.UserMessageActivity;
 import chat.chitchat.adapter.FriendsAdapter;
 import chat.chitchat.adapter.SuggestionAdapter;
 import chat.chitchat.helper.AppUtils;
@@ -369,7 +369,7 @@ public class FriendsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 profileDialog.dismiss();
-                Intent intent = new Intent(getActivity(), MessageActivity.class);
+                Intent intent = new Intent(getActivity(), UserMessageActivity.class);
                 intent.putExtra("userid", id);
                 startActivity(intent);
             }

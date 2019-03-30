@@ -19,8 +19,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -39,9 +42,11 @@ import chat.chitchat.adapter.ShowParticipantsAdapter;
 import chat.chitchat.model.ParticipantList;
 import de.hdodenhof.circleimageview.CircleImageView;
 
+import static chat.chitchat.helper.AppConstant.chatListTableName;
 import static chat.chitchat.helper.AppConstant.groupTableName;
 import static chat.chitchat.helper.AppConstant.profileGroupMemberTable;
 import static chat.chitchat.helper.AppConstant.uploadTableName;
+import static chat.chitchat.helper.AppUtils.updateGroupDesc;
 import static chat.chitchat.helper.AppUtils.updateGroupImage;
 import static chat.chitchat.helper.AppUtils.updateGroupName;
 
@@ -50,7 +55,7 @@ public class CreateGroupSecoundActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private CircleImageView userImage;
     private ImageView editImage;
-    private EditText edt_groupName;
+    private EditText edt_groupName, edt_groupDesc;
     private Button btn_create;
     private RecyclerView rv_participant;
     private ShowParticipantsAdapter participantsAdapter;
@@ -61,6 +66,7 @@ public class CreateGroupSecoundActivity extends AppCompatActivity {
     private static int RESULT_LOAD_IMAGE = 1;
     private ProgressDialog pd;
     private FirebaseUser firebaseUser;
+    private DatabaseReference userRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +76,7 @@ public class CreateGroupSecoundActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.toolbar_createGroupSecound);
         userImage = findViewById(R.id.circleImageView2);
         edt_groupName = findViewById(R.id.editText4);
+        edt_groupDesc = findViewById(R.id.editText5);
         editImage = findViewById(R.id.imageView8);
         btn_create = findViewById(R.id.button3);
         rv_participant = findViewById(R.id.rv_participant);
@@ -87,18 +94,22 @@ public class CreateGroupSecoundActivity extends AppCompatActivity {
         pd.setMessage("Please wait....");
         pd.setCanceledOnTouchOutside(false);
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        userRef = FirebaseDatabase.getInstance().getReference(chatListTableName);
         participantsAdapter = new ShowParticipantsAdapter(this, participantLists);
         rv_participant.setAdapter(participantsAdapter);
         mImageStorage = FirebaseStorage.getInstance().getReference();
-        
+
         btn_create.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(edt_groupName.getText().toString().isEmpty()){
-                    Toast.makeText(CreateGroupSecoundActivity.this, "Please enter your group subject, it can't be empty", 
+                if (edt_groupName.getText().toString().isEmpty()) {
+                    Toast.makeText(CreateGroupSecoundActivity.this, "Please enter your group subject",
                             Toast.LENGTH_SHORT).show();
-                }else{
-                    createGroup(edt_groupName.getText().toString());
+                } else if (edt_groupDesc.getText().toString().isEmpty()) {
+                    Toast.makeText(CreateGroupSecoundActivity.this, "Please provide group description",
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    createGroup(edt_groupName.getText().toString(), edt_groupDesc.getText().toString());
                 }
             }
         });
@@ -114,7 +125,7 @@ public class CreateGroupSecoundActivity extends AppCompatActivity {
         });
     }
 
-    private void createGroup(String groupName) {
+    private void createGroup(String groupName, String groupDesc) {
         pd.show();
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
         groupId = reference.push().getKey();
@@ -130,12 +141,31 @@ public class CreateGroupSecoundActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        updateGroupName(groupName, groupId);
+        userRef.child(firebaseUser.getUid()).child(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.exists()) {
+                    userRef.child(firebaseUser.getUid()).child(groupId).child("id").setValue(groupId);
+                    userRef.child(firebaseUser.getUid()).child(groupId).child("isGroup").setValue("true");
+                    userRef.child(firebaseUser.getUid()).child(groupId).child("time").setValue(String.valueOf(System.currentTimeMillis()));
+                } else {
+                    userRef.child(firebaseUser.getUid()).child(groupId).child("time").setValue(String.valueOf(System.currentTimeMillis()));
+                }
+            }
 
-        if(imageUri == null){
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        updateGroupName(groupName, groupId);
+        updateGroupDesc(groupDesc, groupId);
+
+        if (imageUri == null) {
             updateGroupImage("default", groupId);
             pd.dismiss();
-        }else{
+        } else {
             uploadImageToServer();
         }
 
@@ -162,10 +192,36 @@ public class CreateGroupSecoundActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
+            final int finalI = i;
+            userRef.child(participantLists.get(i).getFriend_id()).child(groupId)
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    userRef.child(participantLists.get(finalI).getFriend_id()).child(groupId).child("id").setValue(groupId);
+                    userRef.child(participantLists.get(finalI).getFriend_id()).child(groupId).child("isGroup").setValue("true");
+                    userRef.child(participantLists.get(finalI).getFriend_id()).child(groupId).child("time").setValue(String.valueOf(System.currentTimeMillis()));
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+
+            if (i == (participantLists.size() - 1)) {
+                Intent intent = new Intent(this, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+                break;
+            }
         }
+
+
     }
 
-    private void uploadImageToServer(){
+    private void uploadImageToServer() {
         final StorageReference filePath = mImageStorage.child(uploadTableName)
                 .child(groupId + ".jpg");
 

@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import chat.chitchat.R;
-import chat.chitchat.activity.MessageActivity;
+import chat.chitchat.activity.UserMessageActivity;
 import chat.chitchat.helper.AppConstant;
 import chat.chitchat.listner.FriendClickListner;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -120,7 +120,7 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
         holder.msg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(context, MessageActivity.class);
+                Intent intent = new Intent(context, UserMessageActivity.class);
                 intent.putExtra("userid", idList.get(pos));
                 context.startActivity(intent);
             }

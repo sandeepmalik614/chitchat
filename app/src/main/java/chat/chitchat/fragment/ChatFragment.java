@@ -42,13 +42,13 @@ public class ChatFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private ChatsAdapter adapter;
-    private ArrayList<ChatList> userList;
     private FirebaseUser firebaseUser;
     private DatabaseReference mChatReference;
     private DatabaseReference mDatabaseReference;
     private TextView tv_noChat;
     private View view;
     private ProgressBar pb_chatList;
+    private ArrayList<ChatList> chatLists;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -64,11 +64,11 @@ public class ChatFragment extends Fragment {
         pb_chatList = view.findViewById(R.id.pb_chatList);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        userList = new ArrayList<>();
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
+        chatLists = new ArrayList<>();
 
-        if(!AppUtils.isConnectionAvailable(getActivity())) {
+        if (!AppUtils.isConnectionAvailable(getActivity())) {
             Toast.makeText(getActivity(), "Please check your internet connection", Toast.LENGTH_SHORT).show();
         }
 
@@ -78,24 +78,20 @@ public class ChatFragment extends Fragment {
         query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                userList.clear();
                 pb_chatList.setVisibility(View.GONE);
-                ArrayList<String> idList = new ArrayList<>();
+                chatLists.clear();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     ChatList chatList = snapshot.getValue(ChatList.class);
-                    if (!userList.contains(chatList.getId())) {
-                        userList.add(chatList);
-                        idList.add(chatList.getId());
-                    }
+                    chatLists.add(chatList);
                 }
 
-                if(idList.size() != 0) {
+                if (chatLists.size() != 0) {
                     tv_noChat.setVisibility(View.GONE);
                     recyclerView.setVisibility(View.VISIBLE);
-                    Collections.reverse(idList);
-                    adapter = new ChatsAdapter(getContext(), idList, mDatabaseReference);
+                    Collections.reverse(chatLists);
+                    adapter = new ChatsAdapter(getContext(), chatLists, mDatabaseReference);
                     recyclerView.setAdapter(adapter);
-                }else{
+                } else {
                     tv_noChat.setVisibility(View.VISIBLE);
                     recyclerView.setVisibility(View.GONE);
                 }

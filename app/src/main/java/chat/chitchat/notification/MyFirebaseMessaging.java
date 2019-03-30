@@ -21,7 +21,7 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import chat.chitchat.R;
 import chat.chitchat.activity.MainActivity;
-import chat.chitchat.activity.MessageActivity;
+import chat.chitchat.activity.UserMessageActivity;
 
 public class MyFirebaseMessaging extends FirebaseMessagingService {
 
@@ -31,7 +31,7 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
         super.onMessageReceived(remoteMessage);
         String user = remoteMessage.getData().get("user");
         String sented = remoteMessage.getData().get("sented");
-        Intent intent = new Intent(this, MessageActivity.class);
+        Intent intent = new Intent(this, UserMessageActivity.class);
         Bundle bundle = new Bundle();
         bundle.putString("userid", user);
         intent.putExtras(bundle);
@@ -68,7 +68,7 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
         int j = Integer.parseInt(user.replaceAll("[\\D]", ""));
         Intent intent = null;
         if(title.equalsIgnoreCase("New Message")){
-            intent = new Intent(this, MessageActivity.class);
+            intent = new Intent(this, UserMessageActivity.class);
         }else{
             intent = new Intent(this, MainActivity.class);
         }

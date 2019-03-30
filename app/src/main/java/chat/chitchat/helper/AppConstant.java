@@ -20,6 +20,7 @@ public class AppConstant {
     public static final String profileGroupImageTable = "groupImage";
     public static final String profileGroupNameTable = "groupName";
     public static final String profileGroupMemberTable = "groupMambers";
+    public static final String profileGroupDescTable = "groupDescription";
     public static final String BASE_URL = "https://fcm.googleapis.com/";
 
 }

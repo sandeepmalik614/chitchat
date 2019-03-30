@@ -3,14 +3,24 @@ package chat.chitchat.model;
 public class ChatList {
 
     private String id;
+    private String isGroup;
     private String  time;
 
-    public ChatList(String id, String time) {
+    public ChatList(String id, String isGroup, String time) {
         this.id = id;
+        this.isGroup = isGroup;
         this.time = time;
     }
 
     public ChatList() {
+    }
+
+    public String getIsGroup() {
+        return isGroup;
+    }
+
+    public void setIsGroup(String isGroup) {
+        this.isGroup = isGroup;
     }
 
     public String getTime() {

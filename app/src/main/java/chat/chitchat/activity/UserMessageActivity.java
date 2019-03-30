@@ -48,12 +48,11 @@ import static chat.chitchat.helper.AppConstant.profileImageTable;
 import static chat.chitchat.helper.AppConstant.profileNameTable;
 import static chat.chitchat.helper.AppConstant.userFriendListTableName;
 import static chat.chitchat.helper.AppUtils.getMyPrettyDate;
-import static chat.chitchat.helper.AppUtils.getMyPrettyOnlyDate;
 import static chat.chitchat.helper.AppUtils.sendNotification;
 import static chat.chitchat.helper.AppUtils.userStatus;
 
 
-public class MessageActivity extends AppCompatActivity {
+public class UserMessageActivity extends AppCompatActivity {
 
     private CircleImageView userImage;
     private TextView username, status, blockText;
@@ -74,7 +73,7 @@ public class MessageActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_message);
+        setContentView(R.layout.activity_user_message);
 
         Toolbar toolbar = findViewById(R.id.messagetoolbar);
         setSupportActionBar(toolbar);
@@ -207,9 +206,9 @@ public class MessageActivity extends AppCompatActivity {
 
                 if (databaseError == null) {
                     isFriend();
-                    Toast.makeText(MessageActivity.this, "You have successfully unblocked this user", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(UserMessageActivity.this, "You have successfully unblocked this user", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(MessageActivity.this, "" + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(UserMessageActivity.this, "" + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -277,7 +276,7 @@ public class MessageActivity extends AppCompatActivity {
                 String msg = edt_message.getText().toString();
                 msg = msg.trim();
                 if (msg.equals("")) {
-                    Toast.makeText(MessageActivity.this, "You can't send empty message", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(UserMessageActivity.this, "You can't send empty message", Toast.LENGTH_SHORT).show();
                 } else {
                     sendMessage(firebaseUser.getUid(), userId, msg);
                     edt_message.setText("");
@@ -336,7 +335,7 @@ public class MessageActivity extends AppCompatActivity {
                                 chat.getReceiver().equals(userId) && chat.getSender().equals(myId)) {
                             mChat.add(chat);
                         }
-                        adapter = new MessageAdapter(MessageActivity.this, mChat);
+                        adapter = new MessageAdapter(UserMessageActivity.this, mChat);
                         recyclerView.setAdapter(adapter);
                     }
                 }
@@ -407,6 +406,7 @@ public class MessageActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.exists()) {
                     senderUserRef.child("id").setValue(userId);
+                    senderUserRef.child("isGroup").setValue("false");
                     senderUserRef.child("time").setValue(String.valueOf(System.currentTimeMillis()));
                 } else {
                     senderUserRef.child("time").setValue(String.valueOf(System.currentTimeMillis()));
@@ -428,6 +428,7 @@ public class MessageActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.exists()) {
                     receiverUserRef.child("id").setValue(firebaseUser.getUid());
+                    receiverUserRef.child("isGroup").setValue(false);
                     receiverUserRef.child("time").setValue(String.valueOf(System.currentTimeMillis()));
                 } else {
                     receiverUserRef.child("time").setValue(String.valueOf(System.currentTimeMillis()));
@@ -447,7 +448,7 @@ public class MessageActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (notify) {
-                    sendNotification(MessageActivity.this, "New Message", firebaseUser.getUid(),receiver, dataSnapshot.child("userName").getValue().toString(), msg);
+                    sendNotification(UserMessageActivity.this, "New Message", firebaseUser.getUid(),receiver, dataSnapshot.child("userName").getValue().toString(), msg);
                 }
                 notify = false;
             }

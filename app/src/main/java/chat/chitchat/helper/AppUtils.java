@@ -38,6 +38,7 @@ import retrofit2.Response;
 import static chat.chitchat.helper.AppConstant.BASE_URL;
 import static chat.chitchat.helper.AppConstant.onlineStatusTable;
 import static chat.chitchat.helper.AppConstant.profileAboutTable;
+import static chat.chitchat.helper.AppConstant.profileGroupDescTable;
 import static chat.chitchat.helper.AppConstant.profileGroupImageTable;
 import static chat.chitchat.helper.AppConstant.profileGroupNameTable;
 import static chat.chitchat.helper.AppConstant.profileImageTable;
@@ -94,11 +95,22 @@ public class AppUtils {
         }
     }
 
+    public static void updateGroupDesc(String description, String groupId){
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference(profileGroupDescTable).child(groupId);
+        try {
+            HashMap<String, Object> hashMap = new HashMap<>();
+            hashMap.put("groupDesc", description);
+            reference.updateChildren(hashMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void updateGroupImage(String url, String groupId){
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference(profileGroupImageTable).child(groupId);
         try {
             HashMap<String, Object> hashMap = new HashMap<>();
-            hashMap.put("imageUrl", url);
+            hashMap.put("groupImageUrl", url);
             reference.updateChildren(hashMap);
         } catch (Exception e) {
             e.printStackTrace();
@@ -321,7 +333,7 @@ public class AppUtils {
                         public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
                             if (response.code() == 200) {
                                 if (response.body().success != 1) {
-//                                    Toast.makeText(MessageActivity.this, "Failed!", Toast.LENGTH_SHORT).show();
+//                                    Toast.makeText(UserMessageActivity.this, "Failed!", Toast.LENGTH_SHORT).show();
                                 }
                             }
                         }

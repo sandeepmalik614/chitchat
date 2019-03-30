@@ -23,6 +23,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -43,6 +45,7 @@ public class GroupProfile extends AppCompatActivity {
     private String groupId;
     private RecyclerView rv_groupDetails;
     private GroupDetailsAdapter groupDetailsAdapter;
+    private FirebaseUser firebaseUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +71,7 @@ public class GroupProfile extends AppCompatActivity {
         rv_groupDetails.setLayoutManager(new LinearLayoutManager(this));
 
         groupId = getIntent().getStringExtra("userid");
-
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
 
         getGroupInfo();
@@ -153,10 +156,15 @@ public class GroupProfile extends AppCompatActivity {
                 ArrayList<GroupDetails> idList = new ArrayList<>();
                 for(DataSnapshot snapshot : dataSnapshot.getChildren()){
                     GroupDetails groupDetails = snapshot.getValue(GroupDetails.class);
-                    idList.add(groupDetails);
+                    if(firebaseUser.getUid().equals(groupDetails.getMemberId())){
+                        idList.add(0, groupDetails);
+                    }else{
+                        idList.add(groupDetails);
+                    }
+
                 }
 
-                groupDetailsAdapter = new GroupDetailsAdapter(GroupProfile.this, idList, mDatabaseReference);
+                groupDetailsAdapter = new GroupDetailsAdapter(GroupProfile.this, idList, mDatabaseReference, firebaseUser);
                 rv_groupDetails.setAdapter(groupDetailsAdapter);
             }
 

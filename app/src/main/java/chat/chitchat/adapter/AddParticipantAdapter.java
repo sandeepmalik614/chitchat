@@ -104,7 +104,7 @@ public class AddParticipantAdapter extends RecyclerView.Adapter<AddParticipantAd
                         friendIdList.get(pos).setSelected(true);
                     }
 
-                    if(friendClickListner != null){
+                    if (friendClickListner != null) {
                         friendClickListner.onClick("group", friendIdList.get(pos).getId());
                     }
                     notifyDataSetChanged();
@@ -112,6 +112,11 @@ public class AddParticipantAdapter extends RecyclerView.Adapter<AddParticipantAd
             }
         });
 
+        if(friendIdList.get(pos).isSelected()){
+            holder.status.setVisibility(View.VISIBLE);
+        }else{
+            holder.status.setVisibility(View.GONE);
+        }
     }
 
     @Override

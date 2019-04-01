@@ -33,7 +33,7 @@ import static chat.chitchat.helper.AppConstant.userFriendListTableName;
 public class AddGroupParticipantActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
-    private TextView tv_selectedCount , tv_next, tv_noFriend;
+    private TextView tv_selectedCount, tv_next, tv_noFriend;
     private ProgressBar progressBar;
     private Toolbar toolbar;
     private ArrayList<ItemSelectedInGroup> friendIdList;
@@ -45,6 +45,18 @@ public class AddGroupParticipantActivity extends AppCompatActivity {
     private FriendClickListner friendClickListner = new FriendClickListner() {
         @Override
         public void onClick(String type, String id) {
+            int selectedCount = alreadyInGroup.size();
+            for (int i = 0; i < friendIdList.size(); i++) {
+                if (friendIdList.get(i).isSelected()) {
+                    selectedCount++;
+                }
+            }
+            tv_selectedCount.setText(selectedCount + " of " + friendIdList.size());
+            if(selectedCount <= alreadyInGroup.size()){
+                tv_next.setVisibility(View.GONE);
+            }else{
+             tv_next.setVisibility(View.VISIBLE);
+            }
 
         }
     };
@@ -80,34 +92,34 @@ public class AddGroupParticipantActivity extends AppCompatActivity {
     private void getFriendsList() {
         mReference.child(userFriendListTableName).child(firebaseUser.getUid())
                 .addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                progressBar.setVisibility(View.GONE);
-                friendIdList.clear();
-                if(dataSnapshot.getChildren() != null){
-                    recyclerView.setVisibility(View.VISIBLE);
-                    tv_noFriend.setVisibility(View.GONE);
-                    for(DataSnapshot snapshot : dataSnapshot.getChildren()){
-                        ItemSelectedInGroup selectedInGroup = new ItemSelectedInGroup();
-                        selectedInGroup.setId(snapshot.child("friend_id").getValue().toString());
-                        selectedInGroup.setSelected(false);
-                        friendIdList.add(selectedInGroup);
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        progressBar.setVisibility(View.GONE);
+                        friendIdList.clear();
+                        if (dataSnapshot.getChildren() != null) {
+                            recyclerView.setVisibility(View.VISIBLE);
+                            tv_noFriend.setVisibility(View.GONE);
+                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                ItemSelectedInGroup selectedInGroup = new ItemSelectedInGroup();
+                                selectedInGroup.setId(snapshot.child("friend_id").getValue().toString());
+                                selectedInGroup.setSelected(false);
+                                friendIdList.add(selectedInGroup);
+                            }
+                            participantAdapter = new AddParticipantAdapter(AddGroupParticipantActivity.this, mReference,
+                                    alreadyInGroup, friendIdList, friendClickListner);
+                            recyclerView.setAdapter(participantAdapter);
+
+                        } else {
+                            recyclerView.setVisibility(View.GONE);
+                            tv_noFriend.setVisibility(View.VISIBLE);
+
+                        }
                     }
-                    participantAdapter = new AddParticipantAdapter(AddGroupParticipantActivity.this, mReference,
-                            alreadyInGroup, friendIdList, friendClickListner);
-                    recyclerView.setAdapter(participantAdapter);
 
-                }else{
-                    recyclerView.setVisibility(View.GONE);
-                    tv_noFriend.setVisibility(View.VISIBLE);
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+                    }
+                });
     }
 }

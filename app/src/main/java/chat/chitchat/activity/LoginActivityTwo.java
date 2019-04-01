@@ -244,4 +244,11 @@ public class LoginActivityTwo extends AppCompatActivity {
             tv_notOtp.setText("Did't get Otp ?");
         }
     }
+
+    @Override
+    public void onBackPressed() {
+        startActivity(new Intent(this, LoginActivity.class));
+        finish();
+        super.onBackPressed();
+    }
 }

@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -40,6 +41,7 @@ public class GroupProfile extends AppCompatActivity {
     private Toolbar toolbar;
     private CircleImageView userImage;
     private ImageView editUserImage;
+    private RelativeLayout rl_addParticipant;
     private TextView groupName, createdBy, groupDesc;
     private DatabaseReference mDatabaseReference;
     private String groupId;
@@ -68,6 +70,7 @@ public class GroupProfile extends AppCompatActivity {
         createdBy = findViewById(R.id.textView36);
         groupDesc = findViewById(R.id.textView42);
         rv_groupDetails = findViewById(R.id.rv_groupDetails);
+        rl_addParticipant = findViewById(R.id.rl_addParticipant);
         rv_groupDetails.setLayoutManager(new LinearLayoutManager(this));
 
         groupId = getIntent().getStringExtra("userid");
@@ -77,7 +80,7 @@ public class GroupProfile extends AppCompatActivity {
         getGroupInfo();
     }
 
-    private void getGroupInfo(){
+    private void getGroupInfo() {
         /*getting group image*/
         mDatabaseReference.child(AppConstant.profileGroupImageTable).child(groupId).addValueEventListener(new ValueEventListener() {
             @Override
@@ -96,7 +99,7 @@ public class GroupProfile extends AppCompatActivity {
         mDatabaseReference.child(AppConstant.profileGroupNameTable).child(groupId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-               groupName.setText(dataSnapshot.child("groupName").getValue().toString());
+                groupName.setText(dataSnapshot.child("groupName").getValue().toString());
             }
 
             @Override
@@ -119,7 +122,7 @@ public class GroupProfile extends AppCompatActivity {
                         .getValue().toString()).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        createdBy.setText("created by "+dataSnapshot.child("userName").getValue()+" on "+dateString);
+                        createdBy.setText("created by " + dataSnapshot.child("userName").getValue() + " on " + dateString);
                     }
 
                     @Override
@@ -151,27 +154,29 @@ public class GroupProfile extends AppCompatActivity {
         /*getting memeber List*/
         mDatabaseReference.child(AppConstant.profileGroupMemberTable).child(groupId)
                 .addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                ArrayList<GroupDetails> idList = new ArrayList<>();
-                for(DataSnapshot snapshot : dataSnapshot.getChildren()){
-                    GroupDetails groupDetails = snapshot.getValue(GroupDetails.class);
-                    if(firebaseUser.getUid().equals(groupDetails.getMemberId())){
-                        idList.add(0, groupDetails);
-                    }else{
-                        idList.add(groupDetails);
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        ArrayList<GroupDetails> idList = new ArrayList<>();
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                            GroupDetails groupDetails = snapshot.getValue(GroupDetails.class);
+                            if (firebaseUser.getUid().equals(groupDetails.getMemberId())) {
+                                idList.add(0, groupDetails);
+                                if (groupDetails.isAdmin()) {
+                                    rl_addParticipant.setVisibility(View.VISIBLE);
+                                }
+                            } else {
+                                idList.add(groupDetails);
+                            }
+
+                        }
+                        groupDetailsAdapter = new GroupDetailsAdapter(GroupProfile.this, idList, mDatabaseReference, firebaseUser);
+                        rv_groupDetails.setAdapter(groupDetailsAdapter);
                     }
 
-                }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                groupDetailsAdapter = new GroupDetailsAdapter(GroupProfile.this, idList, mDatabaseReference, firebaseUser);
-                rv_groupDetails.setAdapter(groupDetailsAdapter);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+                    }
+                });
     }
 }

@@ -31,6 +31,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 import static chat.chitchat.helper.AppConstant.chatTableName;
 import static chat.chitchat.helper.AppConstant.onlineStatusTable;
+import static chat.chitchat.helper.AppConstant.profileGroupDescTable;
 import static chat.chitchat.helper.AppConstant.profileGroupImageTable;
 import static chat.chitchat.helper.AppConstant.profileGroupNameTable;
 import static chat.chitchat.helper.AppConstant.profileImageTable;
@@ -61,11 +62,11 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
 
         if (users.get(position).getIsGroup().equals("true")) {
             getGroupInfo(users.get(position).getId(), holder);
+            lastMessage(users.get(position).getId(), holder, true);
         } else {
             getUserInfo(users.get(position).getId(), holder);
+            lastMessage(users.get(position).getId(), holder, false);
         }
-
-        lastMessage(users.get(position).getId(), holder);
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -188,7 +189,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
 
     }
 
-    private void lastMessage(final String userId, final ViewHolder holder) {
+    private void lastMessage(final String userId, final ViewHolder holder, final boolean isGroup) {
         theLastMessage = "default";
         final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         mDatabaseReference.child(chatTableName).addValueEventListener(new ValueEventListener() {
@@ -226,7 +227,21 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
                 }
                 switch (theLastMessage) {
                     case "default":
-                        holder.lastMsg.setText("No Message");
+                        if(isGroup){
+                            mDatabaseReference.child(profileGroupDescTable).child(userId).addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    holder.lastMsg.setText(dataSnapshot.child("groupDesc").getValue().toString());
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+                            });
+                        }else {
+                            holder.lastMsg.setText("No Message");
+                        }
                         break;
                     default:
                         holder.lastMsg.setText(theLastMessage);

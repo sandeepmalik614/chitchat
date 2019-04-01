@@ -103,7 +103,7 @@ public class CompleteProfileActivity extends AppCompatActivity {
                     setMobileNumber(CompleteProfileActivity.this, mobile);
                     setFirebaseUserID(CompleteProfileActivity.this, mAuth.getUid());
                     Intent intent = new Intent(CompleteProfileActivity.this, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
                     finish();
                 }else{

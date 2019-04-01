@@ -105,6 +105,7 @@ public class CreateGroupActivity extends AppCompatActivity {
                 Intent intent = new Intent(CreateGroupActivity.this, CreateGroupSecoundActivity.class);
                 intent.putExtra("participantList", friendsList);
                 startActivity(intent);
+                finish();
             }
         });
 

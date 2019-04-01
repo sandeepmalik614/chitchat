@@ -112,6 +112,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
                     intent.putExtra("mobile", phone);
                     startActivity(intent);
+                    finish();
                     }
 
                 @Override

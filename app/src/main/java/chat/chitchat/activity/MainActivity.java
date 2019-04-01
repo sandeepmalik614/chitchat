@@ -245,15 +245,7 @@ public class MainActivity extends AppCompatActivity {
         super.onOptionsItemSelected(item);
         switch (item.getItemId()) {
             case R.id.logout:
-                userStatus("logout");
-                updateMobileList();
-                clearTokenFromDatabse();
-                isUserLoggedOut = true;
-                FirebaseAuth.getInstance().signOut();
-                firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-                startActivity(new Intent(this, LoginActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
-                finish();
-                setUserLoggedOut(this, true);
+                openLogoutDialog();
                 return true;
 
             case R.id.profile:
@@ -270,6 +262,36 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return true;
+    }
+
+    private void openLogoutDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Logout");
+        builder.setMessage("Are you sure, you want to logout ?");
+        builder.setPositiveButton("Logout", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                userStatus("logout");
+                updateMobileList();
+                clearTokenFromDatabse();
+                isUserLoggedOut = true;
+                FirebaseAuth.getInstance().signOut();
+                firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+                startActivity(new Intent(MainActivity.this, LoginActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                finish();
+                setUserLoggedOut(MainActivity.this, true);
+            }
+        });
+
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        builder.show();
     }
 
     private void deleteAccount() {
@@ -323,6 +345,7 @@ public class MainActivity extends AppCompatActivity {
     public void onBackPressed() {
         if (onDoubleBackPressed) {
             finish();
+            System.exit(0);
             super.onBackPressed();
         } else {
             Toast.makeText(this, "Please Back again to exit", Toast.LENGTH_SHORT).show();

@@ -14,6 +14,7 @@ import chat.chitchat.notification.Data;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.icu.text.SimpleDateFormat;
 import android.icu.text.UnicodeSetSpanner;
 import android.os.Bundle;
@@ -48,6 +49,8 @@ public class GroupProfile extends AppCompatActivity {
     private RecyclerView rv_groupDetails;
     private GroupDetailsAdapter groupDetailsAdapter;
     private FirebaseUser firebaseUser;
+    private ArrayList<GroupDetails> memberIdList;
+    private ArrayList<String> alreadyMamberList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +75,8 @@ public class GroupProfile extends AppCompatActivity {
         rv_groupDetails = findViewById(R.id.rv_groupDetails);
         rl_addParticipant = findViewById(R.id.rl_addParticipant);
         rv_groupDetails.setLayoutManager(new LinearLayoutManager(this));
+        memberIdList = new ArrayList<>();
+        alreadyMamberList = new ArrayList<>();
 
         groupId = getIntent().getStringExtra("userid");
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -80,7 +85,9 @@ public class GroupProfile extends AppCompatActivity {
         rl_addParticipant.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent intent = new Intent(GroupProfile.this, AddGroupParticipantActivity.class);
+                intent.putExtra("alreadyInGroup", alreadyMamberList);
+                startActivity(intent);
             }
         });
 
@@ -163,20 +170,21 @@ public class GroupProfile extends AppCompatActivity {
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        ArrayList<GroupDetails> idList = new ArrayList<>();
+                        memberIdList.clear();
                         for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                             GroupDetails groupDetails = snapshot.getValue(GroupDetails.class);
                             if (firebaseUser.getUid().equals(groupDetails.getMemberId())) {
-                                idList.add(0, groupDetails);
+                                memberIdList.add(0, groupDetails);
                                 if (groupDetails.isAdmin()) {
                                     rl_addParticipant.setVisibility(View.VISIBLE);
                                 }
                             } else {
-                                idList.add(groupDetails);
+                                alreadyMamberList.add(groupDetails.getMemberId());
+                                memberIdList.add(groupDetails);
                             }
 
                         }
-                        groupDetailsAdapter = new GroupDetailsAdapter(GroupProfile.this, idList, mDatabaseReference, firebaseUser);
+                        groupDetailsAdapter = new GroupDetailsAdapter(GroupProfile.this, memberIdList, mDatabaseReference, firebaseUser);
                         rv_groupDetails.setAdapter(groupDetailsAdapter);
                     }
 
@@ -185,9 +193,5 @@ public class GroupProfile extends AppCompatActivity {
 
                     }
                 });
-    }
-
-    private void handleAddPartcipant(){
-
     }
 }

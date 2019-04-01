@@ -11,6 +11,9 @@ public class ItemSelectedInGroup {
         this.selected = selected;
     }
 
+    public ItemSelectedInGroup() {
+    }
+
     public String getId() {
         return Id;
     }

@@ -28,6 +28,7 @@
         android:id="@+id/imageView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/img_create_group_user"
         app:layout_constraintEnd_toEndOf="@+id/img_create_group_user"
         app:layout_constraintHorizontal_bias="1.0"

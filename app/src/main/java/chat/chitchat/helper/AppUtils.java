@@ -1,9 +1,11 @@
 package chat.chitchat.helper;
 
+import android.annotation.SuppressLint;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.icu.text.SimpleDateFormat;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -20,7 +22,9 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -35,6 +39,7 @@ import chat.chitchat.notification.Token;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
 import static chat.chitchat.helper.AppConstant.BASE_URL;
 import static chat.chitchat.helper.AppConstant.onlineStatusTable;
 import static chat.chitchat.helper.AppConstant.profileAboutTable;
@@ -84,7 +89,7 @@ public class AppUtils {
         }
     }
 
-    public static void updateGroupName(String name, String groupId){
+    public static void updateGroupName(String name, String groupId) {
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference(profileGroupNameTable).child(groupId);
         try {
             HashMap<String, Object> hashMap = new HashMap<>();
@@ -95,7 +100,7 @@ public class AppUtils {
         }
     }
 
-    public static void updateGroupDesc(String description, String groupId){
+    public static void updateGroupDesc(String description, String groupId) {
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference(profileGroupDescTable).child(groupId);
         try {
             HashMap<String, Object> hashMap = new HashMap<>();
@@ -106,7 +111,7 @@ public class AppUtils {
         }
     }
 
-    public static void updateGroupImage(String url, String groupId){
+    public static void updateGroupImage(String url, String groupId) {
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference(profileGroupImageTable).child(groupId);
         try {
             HashMap<String, Object> hashMap = new HashMap<>();
@@ -310,12 +315,12 @@ public class AppUtils {
         return number;
     }
 
-    public static void clearNotification(Context context){
-        NotificationManager notificationManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+    public static void clearNotification(Context context) {
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancelAll();
     }
 
-    public static void sendNotification(final Context context, final String header,final String currentUserId, final String receiver, final String username, final String msg) {
+    public static void sendNotification(final Context context, final String header, final String currentUserId, final String receiver, final String username, final String msg) {
         DatabaseReference tokens = FirebaseDatabase.getInstance().getReference(tokenTableName);
         Query query = tokens.orderByKey().equalTo(receiver);
         query.addValueEventListener(new ValueEventListener() {
@@ -358,5 +363,33 @@ public class AppUtils {
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo mNetworkInfo = mManager.getActiveNetworkInfo();
         return (mNetworkInfo != null) && (mNetworkInfo.isConnected());
+    }
+
+    @SuppressLint("NewApi")
+    public static String getTimeAgo(long millis) {
+
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - millis);
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis() - millis);
+        long hours = TimeUnit.MILLISECONDS.toHours(System.currentTimeMillis() - millis);
+        long days = TimeUnit.MILLISECONDS.toDays(System.currentTimeMillis() - millis);
+
+        if (seconds < 60) {
+            return String.valueOf(seconds) + " seconds ago";
+        } else if (minutes == 1) {
+            return String.valueOf(minutes) + " minute ago";
+        } else if (minutes < 60) {
+            return String.valueOf(minutes) + " minutes ago";
+        } else if (hours == 1) {
+            return String.valueOf(hours) + " hour ago";
+        } else if (hours < 24) {
+            return String.valueOf(hours) + " hours ago";
+        } else if (days == 1) {
+            return String.valueOf(days) + " day ago";
+        } else if (days < 30) {
+            return String.valueOf(days) + " days ago";
+        } else {
+            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss aaa");
+            return formatter.format(new Date(millis));
+        }
     }
 }

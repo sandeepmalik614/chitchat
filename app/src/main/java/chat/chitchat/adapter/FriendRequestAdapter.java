@@ -32,6 +32,7 @@ import static chat.chitchat.helper.AppConstant.profileImageTable;
 import static chat.chitchat.helper.AppConstant.profileNameTable;
 import static chat.chitchat.helper.AppConstant.userFriendListTableName;
 import static chat.chitchat.helper.AppConstant.userTableName;
+import static chat.chitchat.helper.AppUtils.getTimeAgo;
 import static chat.chitchat.helper.AppUtils.sendNotification;
 
 
@@ -62,6 +63,9 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
+
+        holder.sendTime.setText(getTimeAgo(Long.parseLong(requestLists.get(position).getSend_time())));
+
         mUserDatabase.child(profileNameTable).child(requestIdLists.get(position)).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -135,7 +139,7 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
 
         private ImageView userImage;
         private TextView userName;
-        private TextView ignore, accpet, cancel, reminder;
+        private TextView ignore, accpet, cancel, reminder, sendTime;
         private LinearLayout ll_send, ll_receive;
 
         public ViewHolder(@NonNull View itemView) {
@@ -148,6 +152,7 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
             reminder = itemView.findViewById(R.id.btn_sendReminder);
             ll_send = itemView.findViewById(R.id.ll_send);
             ll_receive = itemView.findViewById(R.id.ll_receive);
+            sendTime = itemView.findViewById(R.id.textView48);
         }
     }
 

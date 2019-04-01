@@ -77,6 +77,13 @@ public class GroupProfile extends AppCompatActivity {
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
 
+        rl_addParticipant.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
         getGroupInfo();
     }
 
@@ -178,5 +185,9 @@ public class GroupProfile extends AppCompatActivity {
 
                     }
                 });
+    }
+
+    private void handleAddPartcipant(){
+
     }
 }

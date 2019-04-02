@@ -1,6 +1,5 @@
 package chat.chitchat.notification;
 
-import chat.chitchat.BuildConfig;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.Headers;

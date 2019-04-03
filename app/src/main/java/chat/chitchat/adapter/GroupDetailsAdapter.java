@@ -1,5 +1,6 @@
 package chat.chitchat.adapter;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import chat.chitchat.R;
 import chat.chitchat.helper.AppConstant;
+import chat.chitchat.listner.BlockClickListner;
 import chat.chitchat.model.GroupDetails;
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -29,13 +31,15 @@ public class GroupDetailsAdapter extends RecyclerView.Adapter<GroupDetailsAdapte
     private ArrayList<GroupDetails> groupDetails;
     private DatabaseReference mReference;
     private FirebaseUser firebaseUser;
+    private BlockClickListner clickListner;
 
     public GroupDetailsAdapter(Context context, ArrayList<GroupDetails> groupDetails, DatabaseReference mReference,
-                               FirebaseUser firebaseUser) {
+                               FirebaseUser firebaseUser, BlockClickListner clickListner) {
         this.context = context;
         this.groupDetails = groupDetails;
         this.mReference = mReference;
         this.firebaseUser = firebaseUser;
+        this.clickListner = clickListner;
     }
 
     @NonNull
@@ -46,7 +50,7 @@ public class GroupDetailsAdapter extends RecyclerView.Adapter<GroupDetailsAdapte
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
         getUserImage(groupDetails.get(position).getMemberId(), holder);
         getUserName(groupDetails.get(position).getMemberId(), holder);
         getUserAbout(groupDetails.get(position).getMemberId(), holder);
@@ -56,6 +60,13 @@ public class GroupDetailsAdapter extends RecyclerView.Adapter<GroupDetailsAdapte
         }else{
             holder.userAdmin.setVisibility(View.GONE);
         }
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+              clickListner.onClick(groupDetails.get(position).getMemberId());
+            }
+        });
     }
 
     private void getUserAbout(String memberId, final ViewHolder holder) {

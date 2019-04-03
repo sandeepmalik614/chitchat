@@ -13,6 +13,7 @@ import chat.chitchat.model.GroupDetails;
 import chat.chitchat.model.ItemSelectedInGroup;
 import chat.chitchat.model.ParticipantList;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -27,7 +28,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import static chat.chitchat.helper.AppConstant.chatListTableName;
+import static chat.chitchat.helper.AppConstant.profileGroupMemberTable;
 import static chat.chitchat.helper.AppConstant.userFriendListTableName;
 
 public class AddGroupParticipantActivity extends AppCompatActivity {
@@ -41,18 +45,21 @@ public class AddGroupParticipantActivity extends AppCompatActivity {
     private DatabaseReference mReference;
     private AddParticipantAdapter participantAdapter;
     private FirebaseUser firebaseUser;
+    private ArrayList<String> selectedFriends = new ArrayList<>();
+    private String groupId = "";
 
     private FriendClickListner friendClickListner = new FriendClickListner() {
         @Override
         public void onClick(String type, String id) {
-            int selectedCount = alreadyInGroup.size();
-            for (int i = 0; i < friendIdList.size(); i++) {
-                if (friendIdList.get(i).isSelected()) {
-                    selectedCount++;
-                }
+            if(selectedFriends.contains(id)){
+                int pos = selectedFriends.indexOf(id);
+                selectedFriends.remove(pos);
+            }else{
+                selectedFriends.add(id);
             }
+            int selectedCount = selectedFriends.size();
             tv_selectedCount.setText(selectedCount + " of " + friendIdList.size());
-            if(selectedCount <= alreadyInGroup.size()){
+            if(selectedCount == 0 ){
                 tv_next.setVisibility(View.GONE);
             }else{
              tv_next.setVisibility(View.VISIBLE);
@@ -83,10 +90,58 @@ public class AddGroupParticipantActivity extends AppCompatActivity {
         });
 
         alreadyInGroup = (ArrayList<String>) getIntent().getSerializableExtra("alreadyInGroup");
+        groupId = getIntent().getStringExtra("groupId");
         friendIdList = new ArrayList<>();
         mReference = FirebaseDatabase.getInstance().getReference();
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         getFriendsList();
+
+        tv_next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               addMameberInGroup();
+            }
+        });
+    }
+
+    private void addMameberInGroup() {
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference(profileGroupMemberTable)
+                .child(groupId);
+        final DatabaseReference userRef = FirebaseDatabase.getInstance().getReference(chatListTableName);
+
+        for (int i = 0; i < selectedFriends.size(); i++) {
+            try {
+                HashMap<String, Object> hashMap = new HashMap<>();
+                hashMap.put("memberId", selectedFriends.get(i));
+                hashMap.put("admin", false);
+                hashMap.put("joinDate", String.valueOf(System.currentTimeMillis()));
+                reference.child(selectedFriends.get(i)).updateChildren(hashMap);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            final int finalI = i;
+            userRef.child(selectedFriends.get(i)).child(groupId)
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            userRef.child(selectedFriends.get(finalI)).child(groupId).child("id").setValue(groupId);
+                            userRef.child(selectedFriends.get(finalI)).child(groupId).child("isGroup").setValue("true");
+                            userRef.child(selectedFriends.get(finalI)).child(groupId).child("time").setValue(String.valueOf(System.currentTimeMillis()));
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+
+
+            if (i == (selectedFriends.size() - 1)) {
+                finish();
+                break;
+            }
+        }
     }
 
     private void getFriendsList() {

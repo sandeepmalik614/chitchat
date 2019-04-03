@@ -210,6 +210,7 @@ public class CreateGroupSecoundActivity extends AppCompatActivity {
 
 
             if (i == (participantLists.size() - 1)) {
+                pd.dismiss();
                 Intent intent = new Intent(this, MainActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
@@ -236,7 +237,6 @@ public class CreateGroupSecoundActivity extends AppCompatActivity {
         }).addOnCompleteListener(new OnCompleteListener<Uri>() {
             @Override
             public void onComplete(@NonNull Task<Uri> task) {
-                pd.dismiss();
                 if (task.isSuccessful()) {
                     Uri downUri = task.getResult();
                     String downloadUrl = downUri.toString();

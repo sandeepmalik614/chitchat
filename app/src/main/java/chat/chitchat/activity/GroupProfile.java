@@ -87,6 +87,7 @@ public class GroupProfile extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(GroupProfile.this, AddGroupParticipantActivity.class);
                 intent.putExtra("alreadyInGroup", alreadyMamberList);
+                intent.putExtra("groupId", groupId);
                 startActivity(intent);
             }
         });

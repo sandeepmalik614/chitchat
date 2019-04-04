@@ -9,11 +9,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import chat.chitchat.R;
 import chat.chitchat.adapter.AddParticipantAdapter;
 import chat.chitchat.listner.FriendClickListner;
-import chat.chitchat.model.GroupDetails;
 import chat.chitchat.model.ItemSelectedInGroup;
-import chat.chitchat.model.ParticipantList;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -31,7 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import static chat.chitchat.helper.AppConstant.chatListTableName;
-import static chat.chitchat.helper.AppConstant.profileGroupMemberTable;
+import static chat.chitchat.helper.AppConstant.groupMemberTable;
 import static chat.chitchat.helper.AppConstant.userFriendListTableName;
 
 public class AddGroupParticipantActivity extends AppCompatActivity {
@@ -105,7 +102,7 @@ public class AddGroupParticipantActivity extends AppCompatActivity {
     }
 
     private void addMameberInGroup() {
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference(profileGroupMemberTable)
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference(groupMemberTable)
                 .child(groupId);
         final DatabaseReference userRef = FirebaseDatabase.getInstance().getReference(chatListTableName);
 

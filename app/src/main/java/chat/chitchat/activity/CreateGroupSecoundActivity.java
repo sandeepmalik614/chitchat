@@ -2,11 +2,8 @@ package chat.chitchat.activity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.database.Cursor;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -44,7 +41,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 import static chat.chitchat.helper.AppConstant.chatListTableName;
 import static chat.chitchat.helper.AppConstant.groupTableName;
-import static chat.chitchat.helper.AppConstant.profileGroupMemberTable;
+import static chat.chitchat.helper.AppConstant.groupMemberTable;
 import static chat.chitchat.helper.AppConstant.uploadTableName;
 import static chat.chitchat.helper.AppUtils.updateGroupDesc;
 import static chat.chitchat.helper.AppUtils.updateGroupImage;
@@ -169,7 +166,7 @@ public class CreateGroupSecoundActivity extends AppCompatActivity {
             uploadImageToServer();
         }
 
-        reference = FirebaseDatabase.getInstance().getReference(profileGroupMemberTable)
+        reference = FirebaseDatabase.getInstance().getReference(groupMemberTable)
                 .child(groupId);
         try {
             HashMap<String, Object> hashMap = new HashMap<>();

@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
@@ -31,9 +30,9 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 import static chat.chitchat.helper.AppConstant.chatTableName;
 import static chat.chitchat.helper.AppConstant.onlineStatusTable;
-import static chat.chitchat.helper.AppConstant.profileGroupDescTable;
-import static chat.chitchat.helper.AppConstant.profileGroupImageTable;
-import static chat.chitchat.helper.AppConstant.profileGroupNameTable;
+import static chat.chitchat.helper.AppConstant.groupDescTable;
+import static chat.chitchat.helper.AppConstant.groupImageTable;
+import static chat.chitchat.helper.AppConstant.groupNameTable;
 import static chat.chitchat.helper.AppConstant.profileImageTable;
 import static chat.chitchat.helper.AppConstant.profileNameTable;
 
@@ -159,7 +158,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
     }
 
     private void getGroupInfo(String id, final ViewHolder holder) {
-        mDatabaseReference.child(profileGroupNameTable).child(id).addValueEventListener(new ValueEventListener() {
+        mDatabaseReference.child(groupNameTable).child(id).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 holder.userName.setText(dataSnapshot.child("groupName").getValue().toString());
@@ -171,7 +170,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
             }
         });
 
-        mDatabaseReference.child(profileGroupImageTable).child(id).addValueEventListener(new ValueEventListener() {
+        mDatabaseReference.child(groupImageTable).child(id).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.child("groupImageUrl").getValue().toString().equals("default")) {
@@ -228,7 +227,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
                 switch (theLastMessage) {
                     case "default":
                         if(isGroup){
-                            mDatabaseReference.child(profileGroupDescTable).child(userId).addValueEventListener(new ValueEventListener() {
+                            mDatabaseReference.child(groupDescTable).child(userId).addValueEventListener(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     holder.lastMsg.setText(dataSnapshot.child("groupDesc").getValue().toString());

@@ -10,11 +10,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import chat.chitchat.R;
 import chat.chitchat.adapter.GroupDetailsAdapter;
 import chat.chitchat.helper.AppConstant;
-import chat.chitchat.helper.AppUtils;
-import chat.chitchat.listner.BlockClickListner;
 import chat.chitchat.listner.GroupClickListner;
 import chat.chitchat.model.GroupDetails;
-import chat.chitchat.notification.Data;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import android.annotation.SuppressLint;
@@ -22,10 +19,8 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.icu.text.SimpleDateFormat;
-import android.icu.text.UnicodeSetSpanner;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -52,7 +47,6 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -60,8 +54,8 @@ import java.util.Map;
 import static chat.chitchat.helper.AppConstant.blockTableName;
 import static chat.chitchat.helper.AppConstant.friendRequestTableName;
 import static chat.chitchat.helper.AppConstant.profileAboutTable;
-import static chat.chitchat.helper.AppConstant.profileGroupImageTable;
-import static chat.chitchat.helper.AppConstant.profileGroupMemberTable;
+import static chat.chitchat.helper.AppConstant.groupImageTable;
+import static chat.chitchat.helper.AppConstant.groupMemberTable;
 import static chat.chitchat.helper.AppConstant.profileImageTable;
 import static chat.chitchat.helper.AppConstant.profileNameTable;
 import static chat.chitchat.helper.AppConstant.reportTableName;
@@ -69,10 +63,8 @@ import static chat.chitchat.helper.AppConstant.uploadTableName;
 import static chat.chitchat.helper.AppConstant.userFriendListTableName;
 import static chat.chitchat.helper.AppConstant.userTableName;
 import static chat.chitchat.helper.AppPrefrences.getUserName;
-import static chat.chitchat.helper.AppUtils.isConnectionAvailable;
 import static chat.chitchat.helper.AppUtils.sendNotification;
 import static chat.chitchat.helper.AppUtils.updateGroupImage;
-import static chat.chitchat.helper.AppUtils.updateUserImage;
 import static chat.chitchat.helper.AppUtils.userStatus;
 
 public class GroupProfile extends AppCompatActivity {
@@ -82,7 +74,7 @@ public class GroupProfile extends AppCompatActivity {
     private ImageView editUserImage;
     private RelativeLayout rl_addParticipant;
     private LinearLayout ll_exit;
-    private TextView groupName, createdBy, groupDesc;
+    private TextView groupName, createdBy, groupDesc, exitGroup, reportGroup;
     private DatabaseReference mDatabaseReference;
     private String groupId, currentUserId;
     private RecyclerView rv_groupDetails;
@@ -133,6 +125,8 @@ public class GroupProfile extends AppCompatActivity {
         groupName = findViewById(R.id.textView13);
         createdBy = findViewById(R.id.textView36);
         groupDesc = findViewById(R.id.textView42);
+        exitGroup = findViewById(R.id.textView37);
+        reportGroup = findViewById(R.id.textView38);
         ll_exit = findViewById(R.id.ll_exit);
         rv_groupDetails = findViewById(R.id.rv_groupDetails);
         rl_addParticipant = findViewById(R.id.rl_addParticipant);
@@ -164,12 +158,26 @@ public class GroupProfile extends AppCompatActivity {
             }
         });
 
+        exitGroup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                removeFromGroup(currentUserId, "You");
+            }
+        });
+
+        reportGroup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                reportThisGroup();
+            }
+        });
+
         getGroupInfo();
     }
 
     private void getGroupInfo() {
         /*getting group image*/
-        mDatabaseReference.child(profileGroupImageTable).child(groupId)
+        mDatabaseReference.child(groupImageTable).child(groupId)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -184,7 +192,7 @@ public class GroupProfile extends AppCompatActivity {
                 });
 
         /*getting group name*/
-        mDatabaseReference.child(AppConstant.profileGroupNameTable).child(groupId).addValueEventListener(new ValueEventListener() {
+        mDatabaseReference.child(AppConstant.groupNameTable).child(groupId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (groupName != null) {
@@ -231,7 +239,7 @@ public class GroupProfile extends AppCompatActivity {
         });
 
         /*getting description*/
-        mDatabaseReference.child(AppConstant.profileGroupDescTable).child(groupId).addValueEventListener(new ValueEventListener() {
+        mDatabaseReference.child(AppConstant.groupDescTable).child(groupId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (groupDesc != null) {
@@ -246,11 +254,12 @@ public class GroupProfile extends AppCompatActivity {
         });
 
         /*getting memeber List*/
-        mDatabaseReference.child(AppConstant.profileGroupMemberTable).child(groupId)
+        mDatabaseReference.child(AppConstant.groupMemberTable).child(groupId)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         memberIdList.clear();
+                        alreadyMamberList.clear();
                         for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                             GroupDetails groupDetails = snapshot.getValue(GroupDetails.class);
                             alreadyMamberList.add(groupDetails.getMemberId());
@@ -268,9 +277,9 @@ public class GroupProfile extends AppCompatActivity {
                             }
                         }
 
-                        if(alreadyMamberList.contains(firebaseUser.getUid())){
+                        if (alreadyMamberList.contains(firebaseUser.getUid())) {
                             ll_exit.setVisibility(View.VISIBLE);
-                        }else{
+                        } else {
                             ll_exit.setVisibility(View.GONE);
                         }
 
@@ -333,7 +342,7 @@ public class GroupProfile extends AppCompatActivity {
         storageReference.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                DatabaseReference reference = FirebaseDatabase.getInstance().getReference(profileGroupImageTable)
+                DatabaseReference reference = FirebaseDatabase.getInstance().getReference(groupImageTable)
                         .child(groupId);
                 HashMap<String, Object> hashMap = new HashMap<>();
                 hashMap.put("groupImageUrl", "default");
@@ -771,7 +780,7 @@ public class GroupProfile extends AppCompatActivity {
     }
 
     private void makeGroupAdmin(String id) {
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference(profileGroupMemberTable)
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference(groupMemberTable)
                 .child(groupId);
         try {
             HashMap<String, Object> hashMap = new HashMap<>();
@@ -783,7 +792,7 @@ public class GroupProfile extends AppCompatActivity {
     }
 
     private void dismissGroupAdmin(String id) {
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference(profileGroupMemberTable)
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference(groupMemberTable)
                 .child(groupId);
         try {
             HashMap<String, Object> hashMap = new HashMap<>();
@@ -794,10 +803,15 @@ public class GroupProfile extends AppCompatActivity {
         }
     }
 
-    private void removeFromGroup(String id, final String name) {
+    private void removeFromGroup(final String id, final String name) {
         int pos = alreadyMamberList.indexOf(id);
         alreadyMamberList.remove(pos);
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference(profileGroupMemberTable)
+        if (alreadyMamberList.contains(firebaseUser.getUid())) {
+            ll_exit.setVisibility(View.VISIBLE);
+        } else {
+            ll_exit.setVisibility(View.GONE);
+        }
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference(groupMemberTable)
                 .child(groupId);
         try {
             reference.child(id).removeValue(new DatabaseReference.CompletionListener() {
@@ -805,7 +819,7 @@ public class GroupProfile extends AppCompatActivity {
                 public void onComplete(@Nullable DatabaseError databaseError, @NonNull
                         DatabaseReference databaseReference) {
                     if (databaseError != null) {
-
+                        Toast.makeText(GroupProfile.this, databaseError.getMessage(), Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(GroupProfile.this, name + " removed successfully", Toast.LENGTH_SHORT).show();
                     }
@@ -814,6 +828,10 @@ public class GroupProfile extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void reportThisGroup(){
+
     }
 
     @Override

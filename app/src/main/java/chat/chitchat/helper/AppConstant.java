@@ -11,16 +11,17 @@ public class AppConstant {
     public static final String userFriendListTableName = "Friends";
     public static final String friendRequestTableName = "FriendRequest";
     public static final String blockTableName = "Block";
-    public static final String reportTableName = "Report";
+    public static final String reportTableName = "userReport";
     public static final String onlineStatusTable = "onlineStatus";
     public static final String profileImageTable = "userImage";
     public static final String profileNameTable = "userName";
     public static final String profileAboutTable = "userAbout";
     public static final String groupTableName = "Groups";
-    public static final String profileGroupImageTable = "groupImage";
-    public static final String profileGroupNameTable = "groupName";
-    public static final String profileGroupMemberTable = "groupMambers";
-    public static final String profileGroupDescTable = "groupDescription";
+    public static final String groupImageTable = "groupImage";
+    public static final String groupNameTable = "groupName";
+    public static final String groupMemberTable = "groupMambers";
+    public static final String groupDescTable = "groupDescription";
+    public static final String groupReportTable = "groupReport";
     public static final String BASE_URL = "https://fcm.googleapis.com/";
 
 }

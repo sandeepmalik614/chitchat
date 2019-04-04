@@ -43,9 +43,9 @@ import retrofit2.Response;
 import static chat.chitchat.helper.AppConstant.BASE_URL;
 import static chat.chitchat.helper.AppConstant.onlineStatusTable;
 import static chat.chitchat.helper.AppConstant.profileAboutTable;
-import static chat.chitchat.helper.AppConstant.profileGroupDescTable;
-import static chat.chitchat.helper.AppConstant.profileGroupImageTable;
-import static chat.chitchat.helper.AppConstant.profileGroupNameTable;
+import static chat.chitchat.helper.AppConstant.groupDescTable;
+import static chat.chitchat.helper.AppConstant.groupImageTable;
+import static chat.chitchat.helper.AppConstant.groupNameTable;
 import static chat.chitchat.helper.AppConstant.profileImageTable;
 import static chat.chitchat.helper.AppConstant.profileNameTable;
 import static chat.chitchat.helper.AppConstant.tokenTableName;
@@ -90,7 +90,7 @@ public class AppUtils {
     }
 
     public static void updateGroupName(String name, String groupId) {
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference(profileGroupNameTable).child(groupId);
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference(groupNameTable).child(groupId);
         try {
             HashMap<String, Object> hashMap = new HashMap<>();
             hashMap.put("groupName", name);
@@ -101,7 +101,7 @@ public class AppUtils {
     }
 
     public static void updateGroupDesc(String description, String groupId) {
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference(profileGroupDescTable).child(groupId);
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference(groupDescTable).child(groupId);
         try {
             HashMap<String, Object> hashMap = new HashMap<>();
             hashMap.put("groupDesc", description);
@@ -112,7 +112,7 @@ public class AppUtils {
     }
 
     public static void updateGroupImage(String url, String groupId) {
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference(profileGroupImageTable).child(groupId);
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference(groupImageTable).child(groupId);
         try {
             HashMap<String, Object> hashMap = new HashMap<>();
             hashMap.put("groupImageUrl", url);

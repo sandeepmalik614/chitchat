@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import chat.chitchat.R;
 import chat.chitchat.helper.AppConstant;
 import chat.chitchat.listner.BlockClickListner;
+import chat.chitchat.listner.GroupClickListner;
 import chat.chitchat.model.GroupDetails;
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -31,10 +32,10 @@ public class GroupDetailsAdapter extends RecyclerView.Adapter<GroupDetailsAdapte
     private ArrayList<GroupDetails> groupDetails;
     private DatabaseReference mReference;
     private FirebaseUser firebaseUser;
-    private BlockClickListner clickListner;
+    private GroupClickListner clickListner;
 
     public GroupDetailsAdapter(Context context, ArrayList<GroupDetails> groupDetails, DatabaseReference mReference,
-                               FirebaseUser firebaseUser, BlockClickListner clickListner) {
+                               FirebaseUser firebaseUser, GroupClickListner clickListner) {
         this.context = context;
         this.groupDetails = groupDetails;
         this.mReference = mReference;
@@ -50,7 +51,7 @@ public class GroupDetailsAdapter extends RecyclerView.Adapter<GroupDetailsAdapte
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
         getUserImage(groupDetails.get(position).getMemberId(), holder);
         getUserName(groupDetails.get(position).getMemberId(), holder);
         getUserAbout(groupDetails.get(position).getMemberId(), holder);
@@ -64,7 +65,7 @@ public class GroupDetailsAdapter extends RecyclerView.Adapter<GroupDetailsAdapte
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-              clickListner.onClick(groupDetails.get(position).getMemberId());
+              clickListner.onClick(groupDetails.get(position).getMemberId(), holder.userName.getText().toString() ,groupDetails.get(position).isAdmin());
             }
         });
     }

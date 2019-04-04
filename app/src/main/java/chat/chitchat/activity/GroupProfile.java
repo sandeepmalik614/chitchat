@@ -12,11 +12,13 @@ import chat.chitchat.adapter.GroupDetailsAdapter;
 import chat.chitchat.helper.AppConstant;
 import chat.chitchat.helper.AppUtils;
 import chat.chitchat.listner.BlockClickListner;
+import chat.chitchat.listner.GroupClickListner;
 import chat.chitchat.model.GroupDetails;
 import chat.chitchat.notification.Data;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.icu.text.SimpleDateFormat;
@@ -25,6 +27,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -51,10 +54,21 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
+import static chat.chitchat.helper.AppConstant.blockTableName;
+import static chat.chitchat.helper.AppConstant.friendRequestTableName;
+import static chat.chitchat.helper.AppConstant.profileAboutTable;
 import static chat.chitchat.helper.AppConstant.profileGroupImageTable;
 import static chat.chitchat.helper.AppConstant.profileImageTable;
+import static chat.chitchat.helper.AppConstant.profileNameTable;
+import static chat.chitchat.helper.AppConstant.reportTableName;
 import static chat.chitchat.helper.AppConstant.uploadTableName;
+import static chat.chitchat.helper.AppConstant.userFriendListTableName;
+import static chat.chitchat.helper.AppConstant.userTableName;
+import static chat.chitchat.helper.AppPrefrences.getUserName;
+import static chat.chitchat.helper.AppUtils.isConnectionAvailable;
+import static chat.chitchat.helper.AppUtils.sendNotification;
 import static chat.chitchat.helper.AppUtils.updateGroupImage;
 import static chat.chitchat.helper.AppUtils.updateUserImage;
 
@@ -66,19 +80,28 @@ public class GroupProfile extends AppCompatActivity {
     private RelativeLayout rl_addParticipant;
     private TextView groupName, createdBy, groupDesc;
     private DatabaseReference mDatabaseReference;
-    private String groupId, selectedUserId;
+    private String groupId;
     private RecyclerView rv_groupDetails;
     private GroupDetailsAdapter groupDetailsAdapter;
     private FirebaseUser firebaseUser;
     private ArrayList<GroupDetails> memberIdList;
     private ArrayList<String> alreadyMamberList;
+    private ArrayList<String> friendList;
     private static final int IMAGE_REQUEST = 1;
     private StorageReference mImageStorage;
+    private boolean isYouAdmin = false;
+    private Dialog profileDialog;
 
-    private BlockClickListner clickListner = new BlockClickListner() {
+    private GroupClickListner clickListner = new GroupClickListner() {
         @Override
-        public void onClick(String id) {
-            selectedUserId = id;
+        public void onClick(String id, String name, boolean isAdmin) {
+            if (!firebaseUser.getUid().equals(id)) {
+                if (isYouAdmin) {
+                    isYouAdminDialog(id, name, isAdmin);
+                } else {
+                    isYouNotAdminDialog(id, name);
+                }
+            }
         }
     };
 
@@ -107,6 +130,8 @@ public class GroupProfile extends AppCompatActivity {
         rv_groupDetails.setLayoutManager(new LinearLayoutManager(this));
         memberIdList = new ArrayList<>();
         alreadyMamberList = new ArrayList<>();
+        friendList = new ArrayList<>();
+        profileDialog = new Dialog(this);
 
         groupId = getIntent().getStringExtra("userid");
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -224,6 +249,10 @@ public class GroupProfile extends AppCompatActivity {
                                 memberIdList.add(0, groupDetails);
                                 if (groupDetails.isAdmin()) {
                                     rl_addParticipant.setVisibility(View.VISIBLE);
+                                    isYouAdmin = true;
+                                } else {
+                                    rl_addParticipant.setVisibility(View.GONE);
+                                    isYouAdmin = false;
                                 }
                             } else {
                                 alreadyMamberList.add(groupDetails.getMemberId());
@@ -233,6 +262,24 @@ public class GroupProfile extends AppCompatActivity {
                         }
                         groupDetailsAdapter = new GroupDetailsAdapter(GroupProfile.this, memberIdList, mDatabaseReference, firebaseUser, clickListner);
                         rv_groupDetails.setAdapter(groupDetailsAdapter);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+
+        mDatabaseReference.child(userFriendListTableName).child(firebaseUser.getUid())
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        friendList.clear();
+                        if (dataSnapshot.getValue() != null) {
+                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                friendList.add(snapshot.getKey());
+                            }
+                        }
                     }
 
                     @Override
@@ -325,5 +372,348 @@ public class GroupProfile extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private void isYouAdminDialog(final String id, String name, boolean isAdmin) {
+        CharSequence[] items;
+        AlertDialog.Builder builder = new AlertDialog.Builder(GroupProfile.this);
+        builder.setTitle("Select one");
+
+        if (friendList.contains(id)) {
+            if (isAdmin) {
+                items = new CharSequence[]{"View " + name, "Dissmiss as admin", "Message "+name ,"Remove " + name};
+                builder.setItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int position) {
+                        if(position == 0){
+                            openViewDialog("friend", id);
+                        }
+                    }
+                });
+            } else {
+                items = new CharSequence[]{"View " + name, "Make group admin", "Message "+name ,"Remove " + name};
+                builder.setItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int position) {
+                        if(position == 0){
+                            openViewDialog("friend", id);
+                        }
+                    }
+                });
+            }
+        }else{
+            if (isAdmin) {
+                items = new CharSequence[]{"View " + name, "Dissmiss as admin", "Send request "+name ,"Remove " + name};
+                builder.setItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+            } else {
+                items = new CharSequence[]{"View " + name, "Make group admin", "Send request "+name ,"Remove " + name};
+                builder.setItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+            }
+        }
+
+        builder.show();
+    }
+
+    private void isYouNotAdminDialog(String id, String name) {
+        CharSequence[] items;
+        AlertDialog.Builder builder = new AlertDialog.Builder(GroupProfile.this);
+        builder.setTitle("Select one");
+
+        if (friendList.contains(id)) {
+            items = new CharSequence[]{"View " + name, "Message " + name};
+            builder.setItems(items, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                }
+            });
+        } else {
+            items = new CharSequence[]{"View " + name, "Send request " + name};
+            builder.setItems(items, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                }
+            });
+        }
+
+        builder.show();
+    }
+
+    private void openViewDialog(String type, final String id) {
+        profileDialog.setCanceledOnTouchOutside(false);
+        profileDialog.setContentView(R.layout.profile_dialog);
+        profileDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        profileDialog.show();
+        final String currentUserId = firebaseUser.getUid();
+
+        final CircleImageView img_userDialog = profileDialog.findViewById(R.id.img_userDialog);
+        final TextView dialog_userName = profileDialog.findViewById(R.id.textView18);
+        final TextView dialog_userStatus = profileDialog.findViewById(R.id.textView22);
+        final TextView tv_block = profileDialog.findViewById(R.id.tv_block);
+        final TextView tv_report = profileDialog.findViewById(R.id.tv_report);
+        final TextView dialog_userPhone = profileDialog.findViewById(R.id.textView24);
+        final TextView dialog_userReport = profileDialog.findViewById(R.id.textView25);
+        final TextView dialog_userFriends = profileDialog.findViewById(R.id.textView26);
+        final ImageView phoneImage = profileDialog.findViewById(R.id.imageView6);
+        Button btn_add = profileDialog.findViewById(R.id.button8);
+        Button btn_message = profileDialog.findViewById(R.id.button7);
+        Button btn_unfriend = profileDialog.findViewById(R.id.button6);
+
+        if (type.equalsIgnoreCase("friend")) {
+            btn_message.setVisibility(View.VISIBLE);
+            btn_unfriend.setVisibility(View.VISIBLE);
+            dialog_userPhone.setVisibility(View.VISIBLE);
+            phoneImage.setVisibility(View.VISIBLE);
+            btn_add.setVisibility(View.GONE);
+        } else {
+            btn_message.setVisibility(View.GONE);
+            btn_unfriend.setVisibility(View.GONE);
+            dialog_userPhone.setVisibility(View.GONE);
+            phoneImage.setVisibility(View.GONE);
+            btn_add.setVisibility(View.VISIBLE);
+        }
+
+        mDatabaseReference.child(reportTableName).child(id).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                ArrayList<String> reportList = new ArrayList<>();
+                if (dataSnapshot.getValue() != null) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        reportList.add(snapshot.getKey());
+                    }
+
+                    if (reportList.size() == 0) {
+                        dialog_userReport.setVisibility(View.GONE);
+                    } else {
+                        dialog_userReport.setVisibility(View.VISIBLE);
+                        dialog_userReport.setText(reportList.size() + " person reported as spam");
+                    }
+                } else {
+                    dialog_userReport.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        mDatabaseReference.child(userFriendListTableName).child(id).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null) {
+                    ArrayList<String> idList = new ArrayList<>();
+                    int mutualCount = 0;
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        idList.add(snapshot.getKey());
+                    }
+
+                    if (idList.size() == 0) {
+                        dialog_userFriends.setText("No friend | No Mutual Friend");
+                    } else {
+                        for (int i = 0; i < idList.size(); i++) {
+                            if (friendList.contains(idList.get(i))) {
+                                mutualCount++;
+                            }
+                        }
+
+                        if (mutualCount == 0) {
+                            dialog_userFriends.setText(+idList.size() + " friend | No Mutual friend");
+                        } else {
+
+                            dialog_userFriends.setText(+idList.size() + " friend | " + mutualCount + " Mutual friend");
+
+                        }
+                    }
+                } else {
+                    dialog_userFriends.setText("No friend | No Mutual Friend");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        btn_add.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendFriendRequest(currentUserId, id);
+            }
+        });
+
+        btn_message.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                profileDialog.dismiss();
+                Intent intent = new Intent(GroupProfile.this, UserMessageActivity.class);
+                intent.putExtra("userid", id);
+                startActivity(intent);
+            }
+        });
+
+        btn_unfriend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                removeFromFriend("unfriend", id);
+            }
+        });
+
+        mDatabaseReference.child(profileNameTable).child(id).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                dialog_userName.setText(dataSnapshot.child("userName").getValue().toString());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        mDatabaseReference.child(profileAboutTable).child(id).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                dialog_userStatus.setText(dataSnapshot.child("userStatus").getValue().toString());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        mDatabaseReference.child(profileImageTable).child(id).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Glide.with(GroupProfile.this).load(dataSnapshot.child("imageUrl").getValue().toString())
+                        .into(img_userDialog);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        mDatabaseReference.child(userTableName).child(id).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                dialog_userPhone.setText(dataSnapshot.child("mobile").getValue().toString());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        tv_block.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                blockUser(currentUserId, id);
+            }
+        });
+
+        tv_report.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                reportUser(currentUserId, id);
+            }
+        });
+    }
+
+    private void sendFriendRequest(String currentUserID, final String id) {
+        Map requestMap = new HashMap();
+        requestMap.put(currentUserID + "/" + id + "/request_type", "sent");
+        requestMap.put(currentUserID + "/" + id + "/send_time", String.valueOf(System.currentTimeMillis()));
+        requestMap.put(id + "/" + currentUserID + "/request_type", "received");
+        requestMap.put(id + "/" + currentUserID + "/send_time", String.valueOf(System.currentTimeMillis()));
+
+        mDatabaseReference.child(friendRequestTableName).updateChildren(requestMap, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                Toast.makeText(GroupProfile.this, "Request sent successfully", Toast.LENGTH_SHORT).show();
+                profileDialog.dismiss();
+                sendNotification(GroupProfile.this, "Friend Request", firebaseUser.getUid(), id,
+                        getUserName(GroupProfile.this), "Sent you friend request");
+            }
+        });
+    }
+
+    private void removeFromFriend(final String type, String id) {
+
+        Map hashMap = new HashMap();
+        hashMap.put(firebaseUser.getUid() + "/" + id, null);
+        hashMap.put(id + "/" + firebaseUser.getUid(), null);
+
+        mDatabaseReference.child(userFriendListTableName).updateChildren(hashMap, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+
+                if (databaseError == null) {
+                    profileDialog.dismiss();
+                    if (type.equalsIgnoreCase("block")) {
+                        Toast.makeText(GroupProfile.this, "Blocked Successfully", Toast.LENGTH_SHORT).show();
+                    } else if (type.equals("report")) {
+                        Toast.makeText(GroupProfile.this, "Report as spam successfully and removed from friends", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(GroupProfile.this, "User removed from friends", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(GroupProfile.this, "" + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
+    }
+
+    private void blockUser(final String currentUserID, final String id) {
+        Map hashMap = new HashMap();
+        hashMap.put(currentUserID + "/" + id + "/block_type", "me");
+        hashMap.put(currentUserID + "/" + id + "/key", id);
+        hashMap.put(id + "/" + currentUserID + "/block_type", "other");
+        hashMap.put(id + "/" + currentUserID + "/key", currentUserID);
+
+        mDatabaseReference.child(blockTableName).updateChildren(hashMap, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+
+                if (databaseError == null) {
+                    removeFromFriend("block", id);
+                } else {
+                    Toast.makeText(GroupProfile.this, "" + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
+    }
+
+    private void reportUser(String currentUserID, final String id) {
+        HashMap<String, String> hashMap = new HashMap<>();
+        hashMap.put("id", currentUserID);
+        mDatabaseReference.child(reportTableName).child(id).child(currentUserID).setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    removeFromFriend("report", id);
+                } else {
+                    Toast.makeText(GroupProfile.this, "" + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 }

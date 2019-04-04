@@ -294,28 +294,6 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private void deleteAccount() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-        user.delete()
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            startActivity(new Intent(MainActivity.this, LoginActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
-                            finish();
-                            setUserLoggedOut(MainActivity.this, true);
-                            Toast.makeText(MainActivity.this, "Your Account is deleted successfully", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(MainActivity.this, LoginActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
-                            finish();
-                            setUserLoggedOut(MainActivity.this, true);
-                        } else {
-                            Toast.makeText(MainActivity.this, "Your Account is not deleted", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-    }
-
     private void updateMobileList() {
         final DatabaseReference mMobileReference = FirebaseDatabase.getInstance().getReference(mobileTableName)
                 .child(firebaseUser.getUid());

@@ -173,7 +173,8 @@ public class ProfileActivity extends AppCompatActivity {
         mUserImageReference.child(firebaseUser.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Glide.with(getApplicationContext()).load(dataSnapshot.child("imageUrl").getValue().toString()).into(userImage);
+                Glide.with(getApplicationContext()).load(dataSnapshot.child("imageUrl").getValue().toString())
+                        .into(userImage);
                 AppPrefrences.setUserImage(ProfileActivity.this, dataSnapshot.child("imageUrl").getValue().toString());
                 if (dataSnapshot.child("imageUrl").getValue().toString().equals("default")) {
                     isProfileImage = false;

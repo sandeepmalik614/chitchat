@@ -29,6 +29,7 @@ import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -60,6 +61,7 @@ import static chat.chitchat.helper.AppConstant.blockTableName;
 import static chat.chitchat.helper.AppConstant.friendRequestTableName;
 import static chat.chitchat.helper.AppConstant.profileAboutTable;
 import static chat.chitchat.helper.AppConstant.profileGroupImageTable;
+import static chat.chitchat.helper.AppConstant.profileGroupMemberTable;
 import static chat.chitchat.helper.AppConstant.profileImageTable;
 import static chat.chitchat.helper.AppConstant.profileNameTable;
 import static chat.chitchat.helper.AppConstant.reportTableName;
@@ -71,6 +73,7 @@ import static chat.chitchat.helper.AppUtils.isConnectionAvailable;
 import static chat.chitchat.helper.AppUtils.sendNotification;
 import static chat.chitchat.helper.AppUtils.updateGroupImage;
 import static chat.chitchat.helper.AppUtils.updateUserImage;
+import static chat.chitchat.helper.AppUtils.userStatus;
 
 public class GroupProfile extends AppCompatActivity {
 
@@ -78,9 +81,10 @@ public class GroupProfile extends AppCompatActivity {
     private CircleImageView userImage;
     private ImageView editUserImage;
     private RelativeLayout rl_addParticipant;
+    private LinearLayout ll_exit;
     private TextView groupName, createdBy, groupDesc;
     private DatabaseReference mDatabaseReference;
-    private String groupId;
+    private String groupId, currentUserId;
     private RecyclerView rv_groupDetails;
     private GroupDetailsAdapter groupDetailsAdapter;
     private FirebaseUser firebaseUser;
@@ -109,6 +113,10 @@ public class GroupProfile extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group_profile);
+        initView();
+    }
+
+    private void initView() {
 
         toolbar = findViewById(R.id.groupToolbar);
         setSupportActionBar(toolbar);
@@ -125,6 +133,7 @@ public class GroupProfile extends AppCompatActivity {
         groupName = findViewById(R.id.textView13);
         createdBy = findViewById(R.id.textView36);
         groupDesc = findViewById(R.id.textView42);
+        ll_exit = findViewById(R.id.ll_exit);
         rv_groupDetails = findViewById(R.id.rv_groupDetails);
         rl_addParticipant = findViewById(R.id.rl_addParticipant);
         rv_groupDetails.setLayoutManager(new LinearLayoutManager(this));
@@ -137,7 +146,7 @@ public class GroupProfile extends AppCompatActivity {
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         mImageStorage = FirebaseStorage.getInstance().getReference();
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
-
+        currentUserId = firebaseUser.getUid();
         rl_addParticipant.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -160,20 +169,19 @@ public class GroupProfile extends AppCompatActivity {
 
     private void getGroupInfo() {
         /*getting group image*/
-        mDatabaseReference.child(profileGroupImageTable).child(groupId).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (userImage != null) {
-                    Glide.with(GroupProfile.this).load(dataSnapshot.child("groupImageUrl")
-                            .getValue()).into(userImage);
-                }
-            }
+        mDatabaseReference.child(profileGroupImageTable).child(groupId)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        Glide.with(GroupProfile.this).load(dataSnapshot.child("groupImageUrl")
+                                .getValue()).into(userImage);
+                    }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
-        });
+                    }
+                });
 
         /*getting group name*/
         mDatabaseReference.child(AppConstant.profileGroupNameTable).child(groupId).addValueEventListener(new ValueEventListener() {
@@ -245,6 +253,7 @@ public class GroupProfile extends AppCompatActivity {
                         memberIdList.clear();
                         for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                             GroupDetails groupDetails = snapshot.getValue(GroupDetails.class);
+                            alreadyMamberList.add(groupDetails.getMemberId());
                             if (firebaseUser.getUid().equals(groupDetails.getMemberId())) {
                                 memberIdList.add(0, groupDetails);
                                 if (groupDetails.isAdmin()) {
@@ -255,11 +264,16 @@ public class GroupProfile extends AppCompatActivity {
                                     isYouAdmin = false;
                                 }
                             } else {
-                                alreadyMamberList.add(groupDetails.getMemberId());
                                 memberIdList.add(groupDetails);
                             }
-
                         }
+
+                        if(alreadyMamberList.contains(firebaseUser.getUid())){
+                            ll_exit.setVisibility(View.VISIBLE);
+                        }else{
+                            ll_exit.setVisibility(View.GONE);
+                        }
+
                         groupDetailsAdapter = new GroupDetailsAdapter(GroupProfile.this, memberIdList, mDatabaseReference, firebaseUser, clickListner);
                         rv_groupDetails.setAdapter(groupDetailsAdapter);
                     }
@@ -374,48 +388,76 @@ public class GroupProfile extends AppCompatActivity {
         }
     }
 
-    private void isYouAdminDialog(final String id, String name, boolean isAdmin) {
+    private void isYouAdminDialog(final String id, final String name, boolean isAdmin) {
         CharSequence[] items;
         AlertDialog.Builder builder = new AlertDialog.Builder(GroupProfile.this);
         builder.setTitle("Select one");
 
         if (friendList.contains(id)) {
             if (isAdmin) {
-                items = new CharSequence[]{"View " + name, "Dissmiss as admin", "Message "+name ,"Remove " + name};
+                items = new CharSequence[]{"View " + name, "Dismiss as admin", "Message " + name, "Remove " + name};
                 builder.setItems(items, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int position) {
-                        if(position == 0){
+                        if (position == 0) {
                             openViewDialog("friend", id);
+                        } else if (position == 1) {
+                            dismissGroupAdmin(id);
+                        } else if (position == 2) {
+                            sendMessage(id);
+                        } else if (position == 3) {
+                            removeFromGroup(id, name);
                         }
                     }
                 });
             } else {
-                items = new CharSequence[]{"View " + name, "Make group admin", "Message "+name ,"Remove " + name};
+                items = new CharSequence[]{"View " + name, "Make group admin", "Message " + name, "Remove " + name};
                 builder.setItems(items, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int position) {
-                        if(position == 0){
+                        if (position == 0) {
                             openViewDialog("friend", id);
+                        } else if (position == 1) {
+                            makeGroupAdmin(id);
+                        } else if (position == 2) {
+                            sendMessage(id);
+                        } else if (position == 3) {
+                            removeFromGroup(id, name);
                         }
                     }
                 });
             }
-        }else{
+        } else {
             if (isAdmin) {
-                items = new CharSequence[]{"View " + name, "Dissmiss as admin", "Send request "+name ,"Remove " + name};
+                items = new CharSequence[]{"View " + name, "Dismiss as admin", "Send request " + name, "Remove " + name};
                 builder.setItems(items, new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
+                    public void onClick(DialogInterface dialog, int position) {
+                        if (position == 0) {
+                            openViewDialog("suggestion", id);
+                        } else if (position == 1) {
+                            dismissGroupAdmin(id);
+                        } else if (position == 2) {
+                            sendFriendRequest(currentUserId, id);
+                        } else if (position == 3) {
+                            removeFromGroup(id, name);
+                        }
                     }
                 });
             } else {
-                items = new CharSequence[]{"View " + name, "Make group admin", "Send request "+name ,"Remove " + name};
+                items = new CharSequence[]{"View " + name, "Make group admin", "Send request " + name, "Remove " + name};
                 builder.setItems(items, new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
+                    public void onClick(DialogInterface dialog, int position) {
+                        if (position == 0) {
+                            openViewDialog("suggestion", id);
+                        } else if (position == 1) {
+                            makeGroupAdmin(id);
+                        } else if (position == 2) {
+                            sendFriendRequest(currentUserId, id);
+                        } else if (position == 3) {
+                            removeFromGroup(id, name);
+                        }
                     }
                 });
             }
@@ -424,7 +466,7 @@ public class GroupProfile extends AppCompatActivity {
         builder.show();
     }
 
-    private void isYouNotAdminDialog(String id, String name) {
+    private void isYouNotAdminDialog(final String id, String name) {
         CharSequence[] items;
         AlertDialog.Builder builder = new AlertDialog.Builder(GroupProfile.this);
         builder.setTitle("Select one");
@@ -433,16 +475,24 @@ public class GroupProfile extends AppCompatActivity {
             items = new CharSequence[]{"View " + name, "Message " + name};
             builder.setItems(items, new DialogInterface.OnClickListener() {
                 @Override
-                public void onClick(DialogInterface dialog, int which) {
-
+                public void onClick(DialogInterface dialog, int position) {
+                    if (position == 0) {
+                        openViewDialog("friend", id);
+                    } else if (position == 1) {
+                        sendMessage(id);
+                    }
                 }
             });
         } else {
             items = new CharSequence[]{"View " + name, "Send request " + name};
             builder.setItems(items, new DialogInterface.OnClickListener() {
                 @Override
-                public void onClick(DialogInterface dialog, int which) {
-
+                public void onClick(DialogInterface dialog, int position) {
+                    if (position == 0) {
+                        openViewDialog("suggestion", id);
+                    } else if (position == 1) {
+                        sendFriendRequest(currentUserId, id);
+                    }
                 }
             });
         }
@@ -455,7 +505,6 @@ public class GroupProfile extends AppCompatActivity {
         profileDialog.setContentView(R.layout.profile_dialog);
         profileDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         profileDialog.show();
-        final String currentUserId = firebaseUser.getUid();
 
         final CircleImageView img_userDialog = profileDialog.findViewById(R.id.img_userDialog);
         final TextView dialog_userName = profileDialog.findViewById(R.id.textView18);
@@ -559,9 +608,7 @@ public class GroupProfile extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 profileDialog.dismiss();
-                Intent intent = new Intent(GroupProfile.this, UserMessageActivity.class);
-                intent.putExtra("userid", id);
-                startActivity(intent);
+                sendMessage(id);
             }
         });
 
@@ -715,5 +762,75 @@ public class GroupProfile extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void sendMessage(String id) {
+        Intent intent = new Intent(GroupProfile.this, UserMessageActivity.class);
+        intent.putExtra("userid", id);
+        startActivity(intent);
+    }
+
+    private void makeGroupAdmin(String id) {
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference(profileGroupMemberTable)
+                .child(groupId);
+        try {
+            HashMap<String, Object> hashMap = new HashMap<>();
+            hashMap.put("admin", true);
+            reference.child(id).updateChildren(hashMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void dismissGroupAdmin(String id) {
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference(profileGroupMemberTable)
+                .child(groupId);
+        try {
+            HashMap<String, Object> hashMap = new HashMap<>();
+            hashMap.put("admin", false);
+            reference.child(id).updateChildren(hashMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void removeFromGroup(String id, final String name) {
+        int pos = alreadyMamberList.indexOf(id);
+        alreadyMamberList.remove(pos);
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference(profileGroupMemberTable)
+                .child(groupId);
+        try {
+            reference.child(id).removeValue(new DatabaseReference.CompletionListener() {
+                @Override
+                public void onComplete(@Nullable DatabaseError databaseError, @NonNull
+                        DatabaseReference databaseReference) {
+                    if (databaseError != null) {
+
+                    } else {
+                        Toast.makeText(GroupProfile.this, name + " removed successfully", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        finish();
+        super.onBackPressed();
+    }
+
+    @Override
+    protected void onStart() {
+        userStatus("online");
+        super.onStart();
+    }
+
+    @Override
+    protected void onPause() {
+        userStatus(String.valueOf(System.currentTimeMillis()));
+        super.onPause();
     }
 }

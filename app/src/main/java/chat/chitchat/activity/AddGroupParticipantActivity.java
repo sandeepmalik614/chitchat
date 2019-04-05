@@ -30,6 +30,7 @@ import java.util.HashMap;
 import static chat.chitchat.helper.AppConstant.chatListTableName;
 import static chat.chitchat.helper.AppConstant.groupMemberTable;
 import static chat.chitchat.helper.AppConstant.userFriendListTableName;
+import static chat.chitchat.helper.AppUtils.sendNotification;
 
 public class AddGroupParticipantActivity extends AppCompatActivity {
 
@@ -43,7 +44,7 @@ public class AddGroupParticipantActivity extends AppCompatActivity {
     private AddParticipantAdapter participantAdapter;
     private FirebaseUser firebaseUser;
     private ArrayList<String> selectedFriends = new ArrayList<>();
-    private String groupId = "";
+    private String groupId = "", groupName = "";
 
     private FriendClickListner friendClickListner = new FriendClickListner() {
         @Override
@@ -88,6 +89,7 @@ public class AddGroupParticipantActivity extends AppCompatActivity {
 
         alreadyInGroup = (ArrayList<String>) getIntent().getSerializableExtra("alreadyInGroup");
         groupId = getIntent().getStringExtra("groupId");
+        groupName = getIntent().getStringExtra("groupName");
         friendIdList = new ArrayList<>();
         mReference = FirebaseDatabase.getInstance().getReference();
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -133,7 +135,8 @@ public class AddGroupParticipantActivity extends AppCompatActivity {
                         }
                     });
 
-
+            sendNotification("Group", firebaseUser.getUid(), selectedFriends.get(i),
+                    groupName, "added to you in a group");
             if (i == (selectedFriends.size() - 1)) {
                 finish();
                 break;

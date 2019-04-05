@@ -227,7 +227,7 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
                     mDatabaseReference.child(friendRequestTableName).updateChildren(requestMap, new DatabaseReference.CompletionListener() {
                         @Override
                         public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
-                            sendNotification(context, currentUserId, "Request reminder" ,id, userName, "Hi, I am waiting for your response");
+                            sendNotification(currentUserId, "Request reminder" ,id, userName, "Hi, I am waiting for your response");
                         }
                     });
                 }

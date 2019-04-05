@@ -428,7 +428,7 @@ public class UserMessageActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.exists()) {
                     receiverUserRef.child("id").setValue(firebaseUser.getUid());
-                    receiverUserRef.child("isGroup").setValue(false);
+                    receiverUserRef.child("isGroup").setValue("false");
                     receiverUserRef.child("time").setValue(String.valueOf(System.currentTimeMillis()));
                 } else {
                     receiverUserRef.child("time").setValue(String.valueOf(System.currentTimeMillis()));
@@ -448,7 +448,8 @@ public class UserMessageActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (notify) {
-                    sendNotification(UserMessageActivity.this, "New Message", firebaseUser.getUid(),receiver, dataSnapshot.child("userName").getValue().toString(), msg);
+                    sendNotification("New Message", firebaseUser.getUid(),receiver,
+                            dataSnapshot.child("userName").getValue().toString(), msg);
                 }
                 notify = false;
             }

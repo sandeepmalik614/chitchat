@@ -67,7 +67,7 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
 
         int j = Integer.parseInt(user.replaceAll("[\\D]", ""));
         Intent intent = null;
-        if(title.equalsIgnoreCase("New Message")){
+        if(title.equalsIgnoreCase("New Message") || title.equalsIgnoreCase("Group")){
             intent = new Intent(this, UserMessageActivity.class);
         }else{
             intent = new Intent(this, MainActivity.class);

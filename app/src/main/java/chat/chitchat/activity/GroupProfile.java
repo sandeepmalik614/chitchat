@@ -12,7 +12,6 @@ import chat.chitchat.adapter.GroupDetailsAdapter;
 import chat.chitchat.helper.AppConstant;
 import chat.chitchat.listner.GroupClickListner;
 import chat.chitchat.model.GroupDetails;
-import chat.chitchat.notification.Data;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import android.annotation.SuppressLint;
@@ -150,6 +149,7 @@ public class GroupProfile extends AppCompatActivity {
                 Intent intent = new Intent(GroupProfile.this, AddGroupParticipantActivity.class);
                 intent.putExtra("alreadyInGroup", alreadyMamberList);
                 intent.putExtra("groupId", groupId);
+                intent.putExtra("groupName", groupName.getText().toString());
                 startActivity(intent);
             }
         });
@@ -707,7 +707,7 @@ public class GroupProfile extends AppCompatActivity {
             public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
                 Toast.makeText(GroupProfile.this, "Request sent successfully", Toast.LENGTH_SHORT).show();
                 profileDialog.dismiss();
-                sendNotification(GroupProfile.this, "Friend Request", firebaseUser.getUid(), id,
+                sendNotification("Friend Request", firebaseUser.getUid(), id,
                         getUserName(GroupProfile.this), "Sent you friend request");
             }
         });

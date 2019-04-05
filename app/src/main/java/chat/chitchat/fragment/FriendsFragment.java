@@ -458,7 +458,7 @@ public class FriendsFragment extends Fragment {
             public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
                 Toast.makeText(getActivity(), "Request sent successfully", Toast.LENGTH_SHORT).show();
                 profileDialog.dismiss();
-                sendNotification(getActivity(), "Friend Request", firebaseUser.getUid(), id,
+                sendNotification("Friend Request", firebaseUser.getUid(), id,
                         getUserName(getActivity()), "Sent you friend request");
             }
         });

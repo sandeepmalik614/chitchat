@@ -320,7 +320,7 @@ public class AppUtils {
         notificationManager.cancelAll();
     }
 
-    public static void sendNotification(final Context context, final String header, final String currentUserId, final String receiver, final String username, final String msg) {
+    public static void sendNotification(final String header, final String currentUserId, final String receiver, final String username, final String msg) {
         DatabaseReference tokens = FirebaseDatabase.getInstance().getReference(tokenTableName);
         Query query = tokens.orderByKey().equalTo(receiver);
         query.addValueEventListener(new ValueEventListener() {

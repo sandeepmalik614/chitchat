@@ -43,6 +43,7 @@ import static chat.chitchat.helper.AppConstant.chatListTableName;
 import static chat.chitchat.helper.AppConstant.groupTableName;
 import static chat.chitchat.helper.AppConstant.groupMemberTable;
 import static chat.chitchat.helper.AppConstant.uploadTableName;
+import static chat.chitchat.helper.AppUtils.sendNotification;
 import static chat.chitchat.helper.AppUtils.updateGroupDesc;
 import static chat.chitchat.helper.AppUtils.updateGroupImage;
 import static chat.chitchat.helper.AppUtils.updateGroupName;
@@ -204,7 +205,8 @@ public class CreateGroupSecoundActivity extends AppCompatActivity {
 
                 }
             });
-
+                sendNotification("Group", firebaseUser.getUid(), participantLists.get(i).getFriend_id(),
+                participantLists.get(i).getName(), "added to you in a group");
 
             if (i == (participantLists.size() - 1)) {
                 pd.dismiss();

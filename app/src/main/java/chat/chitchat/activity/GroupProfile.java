@@ -12,6 +12,7 @@ import chat.chitchat.adapter.GroupDetailsAdapter;
 import chat.chitchat.helper.AppConstant;
 import chat.chitchat.listner.GroupClickListner;
 import chat.chitchat.model.GroupDetails;
+import chat.chitchat.notification.Data;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import android.annotation.SuppressLint;
@@ -21,6 +22,7 @@ import android.content.Intent;
 import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -53,6 +55,7 @@ import java.util.Map;
 
 import static chat.chitchat.helper.AppConstant.blockTableName;
 import static chat.chitchat.helper.AppConstant.friendRequestTableName;
+import static chat.chitchat.helper.AppConstant.groupReportTable;
 import static chat.chitchat.helper.AppConstant.profileAboutTable;
 import static chat.chitchat.helper.AppConstant.groupImageTable;
 import static chat.chitchat.helper.AppConstant.groupMemberTable;
@@ -831,7 +834,58 @@ public class GroupProfile extends AppCompatActivity {
     }
 
     private void reportThisGroup(){
+        final DatabaseReference reference = FirebaseDatabase.getInstance().getReference(groupReportTable);
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.getValue() != null){
+                    ArrayList<String> reportList = new ArrayList<>();
+                    for(DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        try {
+                            reportList.add(snapshot.getKey());
+                        }catch (Exception e){
+                            Log.d("TAG", "report list log :- " + e.getMessage());
+                        }
+                    }
+                    if(reportList.contains(currentUserId)){
+                        Toast.makeText(GroupProfile.this, "You have already reported against this group.", Toast.LENGTH_SHORT).show();
+                    }else{
+                        HashMap<String, String> hashMap = new HashMap<>();
+                        hashMap.put("id", currentUserId);
+                        hashMap.put("reportedDated", String.valueOf(System.currentTimeMillis()));
+                        reference.child(currentUserId).setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if(task.isSuccessful()){
+                                    Toast.makeText(GroupProfile.this, "You have successfully reported this group as spam", Toast.LENGTH_SHORT).show();
+                                }else{
+                                    Toast.makeText(GroupProfile.this, ""+task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                    }
+                }else{
+                    HashMap<String, String> hashMap = new HashMap<>();
+                    hashMap.put("id", currentUserId);
+                    hashMap.put("reportedDated", String.valueOf(System.currentTimeMillis()));
+                    reference.child(currentUserId).setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if(task.isSuccessful()){
+                                Toast.makeText(GroupProfile.this, "You have successfully reported this group as spam", Toast.LENGTH_SHORT).show();
+                            }else{
+                                Toast.makeText(GroupProfile.this, ""+task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+                }
+            }
 
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override

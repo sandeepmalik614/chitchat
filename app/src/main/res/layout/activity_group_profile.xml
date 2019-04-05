@@ -145,7 +145,7 @@
                     android:drawablePadding="15dp"
                     android:gravity="center_vertical"
                     android:padding="5dp"
-                    android:text="Report group"
+                    android:text="Report as spam"
                     android:textColor="#434343" />
 
                 <TextView

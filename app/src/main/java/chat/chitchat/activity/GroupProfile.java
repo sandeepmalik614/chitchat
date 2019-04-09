@@ -31,6 +31,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -175,7 +176,30 @@ public class GroupProfile extends AppCompatActivity {
             }
         });
 
+        groupName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goToEdit("groupName", groupName.getText().toString());
+            }
+        });
+
+        groupDesc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goToEdit("groupDesc", groupDesc.getText().toString());
+            }
+        });
+
         getGroupInfo();
+    }
+
+    private void goToEdit(String key, String value) {
+        Intent intent = new Intent(this, EditProfileActivity.class);
+        intent.putExtra("key", key);
+        intent.putExtra("value", value);
+        intent.putExtra("isGroup", true);
+        intent.putExtra("groupId", groupId);
+        startActivity(intent);
     }
 
     private void getGroupInfo() {
@@ -843,48 +867,48 @@ public class GroupProfile extends AppCompatActivity {
         }
     }
 
-    private void reportThisGroup(){
+    private void reportThisGroup() {
         final DatabaseReference reference = FirebaseDatabase.getInstance().getReference(groupReportTable);
         reference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot.getValue() != null){
+                if (dataSnapshot.getValue() != null) {
                     ArrayList<String> reportList = new ArrayList<>();
-                    for(DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         try {
                             reportList.add(snapshot.getKey());
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             Log.d("TAG", "report list log :- " + e.getMessage());
                         }
                     }
-                    if(reportList.contains(currentUserId)){
+                    if (reportList.contains(currentUserId)) {
                         Toast.makeText(GroupProfile.this, "You have already reported against this group.", Toast.LENGTH_SHORT).show();
-                    }else{
+                    } else {
                         HashMap<String, String> hashMap = new HashMap<>();
                         hashMap.put("id", currentUserId);
                         hashMap.put("reportedDated", String.valueOf(System.currentTimeMillis()));
                         reference.child(currentUserId).setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
-                                if(task.isSuccessful()){
+                                if (task.isSuccessful()) {
                                     Toast.makeText(GroupProfile.this, "You have successfully reported this group as spam", Toast.LENGTH_SHORT).show();
-                                }else{
-                                    Toast.makeText(GroupProfile.this, ""+task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(GroupProfile.this, "" + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });
                     }
-                }else{
+                } else {
                     HashMap<String, String> hashMap = new HashMap<>();
                     hashMap.put("id", currentUserId);
                     hashMap.put("reportedDated", String.valueOf(System.currentTimeMillis()));
                     reference.child(currentUserId).setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
-                            if(task.isSuccessful()){
+                            if (task.isSuccessful()) {
                                 Toast.makeText(GroupProfile.this, "You have successfully reported this group as spam", Toast.LENGTH_SHORT).show();
-                            }else{
-                                Toast.makeText(GroupProfile.this, ""+task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(GroupProfile.this, "" + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         }
                     });

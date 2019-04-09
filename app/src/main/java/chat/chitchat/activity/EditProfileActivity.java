@@ -11,6 +11,8 @@ import androidx.appcompat.widget.Toolbar;
 import chat.chitchat.R;
 
 import static chat.chitchat.helper.AppUtils.getMyPrettyDate;
+import static chat.chitchat.helper.AppUtils.updateGroupDesc;
+import static chat.chitchat.helper.AppUtils.updateGroupName;
 import static chat.chitchat.helper.AppUtils.updateUserAbout;
 import static chat.chitchat.helper.AppUtils.updateUserName;
 import static chat.chitchat.helper.AppUtils.userStatus;
@@ -31,7 +33,6 @@ public class EditProfileActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.toolbar_edit);
 
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Edit Profile");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -43,7 +44,13 @@ public class EditProfileActivity extends AppCompatActivity {
 
         final String key = getIntent().getStringExtra("key");
         String value = getIntent().getStringExtra("value");
+        final boolean isGroup = getIntent().getBooleanExtra("isGroup", false);
 
+        if(isGroup){
+            getSupportActionBar().setTitle("Edit Group");
+        }else{
+            getSupportActionBar().setTitle("Edit Profile");
+        }
 
         editText.setText(value);
 
@@ -53,16 +60,28 @@ public class EditProfileActivity extends AppCompatActivity {
                 if (editText.getText().toString().isEmpty()) {
                     Toast.makeText(EditProfileActivity.this, "This field is required", Toast.LENGTH_SHORT).show();
                 } else {
-                    updateUserProfile(key, editText.getText().toString());
+                    if (isGroup) {
+                        String groupId = getIntent().getStringExtra("groupId");
+                        if(key.equals("groupName")){
+                            updateGroupName(editText.getText().toString(), groupId);
+                            Toast.makeText(EditProfileActivity.this, "Group Name updated successfully", Toast.LENGTH_SHORT).show();
+                        }else{
+                            updateGroupDesc(editText.getText().toString(), groupId);
+                            Toast.makeText(EditProfileActivity.this, "Group Description updated successfully", Toast.LENGTH_SHORT).show();
+                        }
+                        finish();
+                    } else {
+                        updateUserProfile(key, editText.getText().toString());
+                    }
                 }
             }
         });
     }
 
     private void updateUserProfile(String key, String value) {
-        if(key.equals("userName")){
+        if (key.equals("userName")) {
             updateUserName(value);
-        }else{
+        } else {
             updateUserAbout(value);
         }
         Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show();

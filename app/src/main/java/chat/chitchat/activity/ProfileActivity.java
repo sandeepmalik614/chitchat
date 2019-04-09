@@ -273,6 +273,7 @@ public class ProfileActivity extends AppCompatActivity {
         Intent intent = new Intent(this, EditProfileActivity.class);
         intent.putExtra("key", key);
         intent.putExtra("value", value);
+        intent.putExtra("isGroup", false);
         startActivity(intent);
     }
 

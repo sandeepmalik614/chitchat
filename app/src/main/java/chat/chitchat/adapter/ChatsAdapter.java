@@ -62,10 +62,10 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
 
         if (users.get(position).getIsGroup().equals("true")) {
             getGroupInfo(users.get(position).getId(), holder);
-            lastMessage(users.get(position).getId(), holder, true, users.get(position).getTime());
+            lastUserMessage(users.get(position).getId(), holder, true, users.get(position).getTime());
         } else {
             getUserInfo(users.get(position).getId(), holder);
-            lastMessage(users.get(position).getId(), holder, false, users.get(position).getTime());
+            lastUserMessage(users.get(position).getId(), holder, false, users.get(position).getTime());
         }
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -190,7 +190,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
 
     }
 
-    private void lastMessage(final String userId, final ViewHolder holder, final boolean isGroup, String time) {
+    private void lastUserMessage(final String userId, final ViewHolder holder, final boolean isGroup, String time) {
         holder.lastMsgDate.setText(getLastMsgDate(Long.parseLong(time)));
         theLastMessage = "default";
         final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();

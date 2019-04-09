@@ -90,8 +90,13 @@ public class ChatFragment extends Fragment {
                     tv_noChat.setVisibility(View.GONE);
                     recyclerView.setVisibility(View.VISIBLE);
                     Collections.reverse(chatLists);
-                    adapter = new ChatsAdapter(getContext(), chatLists, mDatabaseReference);
-                    recyclerView.setAdapter(adapter);
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            adapter = new ChatsAdapter(getContext(), chatLists, mDatabaseReference);
+                            recyclerView.setAdapter(adapter);
+                        }
+                    }, 100);
                 } else {
                     tv_noChat.setVisibility(View.VISIBLE);
                     recyclerView.setVisibility(View.GONE);

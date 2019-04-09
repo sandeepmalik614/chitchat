@@ -25,7 +25,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     private static final int MSG_TYPE_RIGHT = 1;
     private Context context;
     private ArrayList<Chat> mChat;
-    FirebaseUser fuser;
+    private FirebaseUser fuser;
 
     public MessageAdapter(Context context, ArrayList<Chat> chats) {
         this.context = context;

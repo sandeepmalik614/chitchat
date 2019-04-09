@@ -272,6 +272,43 @@ public class AppUtils {
         }
     }
 
+    public static String getLastMsgDate(long neededTimeMilis) {
+        Calendar nowTime = Calendar.getInstance();
+        Calendar neededTime = Calendar.getInstance();
+        neededTime.setTimeInMillis(neededTimeMilis);
+
+        if ((neededTime.get(Calendar.YEAR) == nowTime.get(Calendar.YEAR))) {
+
+            if ((neededTime.get(Calendar.MONTH) == nowTime.get(Calendar.MONTH))) {
+
+                if (neededTime.get(Calendar.DATE) - nowTime.get(Calendar.DATE) == 1) {
+                    //here return like "Tomorrow at 12:00 AM/PM"
+                    return "Tomorrow";
+
+                } else if (nowTime.get(Calendar.DATE) == neededTime.get(Calendar.DATE)) {
+                    //here return like "Today at 12:00 AM/PM"
+                    return ""+DateFormat.format("hh:mm aaa", neededTime);
+
+                } else if (nowTime.get(Calendar.DATE) - neededTime.get(Calendar.DATE) == 1) {
+                    //here return like "Yesterday at 12:00 AM/PM"
+                    return "Yesterday";
+
+                } else {
+                    //here return like "May 31, 12:00 AM/PM"
+                    return DateFormat.format("dd/MM/yy", neededTime).toString();
+                }
+
+            } else {
+                //here return like "May 31, 12:00 AM/PM"
+                return DateFormat.format("dd/MM/yy", neededTime).toString();
+            }
+
+        } else {
+            //here return like "May 31 2010, 12:00 AM/PM" - it's a different year we need to show it
+            return DateFormat.format("dd/MM/yy", neededTime).toString();
+        }
+    }
+
     public static void settingDialog(final Context context) {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(context, R.style.DialogTheme);
         alertDialog.setMessage("You Have To Give Permission From Your Device Setting To go in Setting Please Click on Settings Button");

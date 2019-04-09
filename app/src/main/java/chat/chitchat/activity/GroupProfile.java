@@ -282,8 +282,18 @@ public class GroupProfile extends AppCompatActivity {
 
                         if (alreadyMamberList.contains(firebaseUser.getUid())) {
                             ll_exit.setVisibility(View.VISIBLE);
+                            editUserImage.setVisibility(View.VISIBLE);
+                            groupName.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_edit_24dp, 0);
+                            groupName.setClickable(true);
+                            groupDesc.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_edit_24dp, 0);
+                            groupDesc.setClickable(true);
                         } else {
                             ll_exit.setVisibility(View.GONE);
+                            editUserImage.setVisibility(View.GONE);
+                            groupName.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                            groupName.setClickable(false);
+                            groupDesc.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                            groupDesc.setClickable(false);
                         }
 
                         groupDetailsAdapter = new GroupDetailsAdapter(GroupProfile.this, memberIdList, mDatabaseReference, firebaseUser, clickListner);

@@ -44,6 +44,7 @@ public class EditProfileActivity extends AppCompatActivity {
         final String key = getIntent().getStringExtra("key");
         String value = getIntent().getStringExtra("value");
 
+
         editText.setText(value);
 
         button.setOnClickListener(new View.OnClickListener() {
@@ -52,13 +53,13 @@ public class EditProfileActivity extends AppCompatActivity {
                 if (editText.getText().toString().isEmpty()) {
                     Toast.makeText(EditProfileActivity.this, "This field is required", Toast.LENGTH_SHORT).show();
                 } else {
-                    updateProfile(key, editText.getText().toString());
+                    updateUserProfile(key, editText.getText().toString());
                 }
             }
         });
     }
 
-    private void updateProfile(String key, String value) {
+    private void updateUserProfile(String key, String value) {
         if(key.equals("userName")){
             updateUserName(value);
         }else{

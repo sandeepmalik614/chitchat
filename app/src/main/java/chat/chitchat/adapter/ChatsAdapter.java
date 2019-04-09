@@ -2,7 +2,7 @@ package chat.chitchat.adapter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Typeface;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +35,7 @@ import static chat.chitchat.helper.AppConstant.groupImageTable;
 import static chat.chitchat.helper.AppConstant.groupNameTable;
 import static chat.chitchat.helper.AppConstant.profileImageTable;
 import static chat.chitchat.helper.AppConstant.profileNameTable;
+import static chat.chitchat.helper.AppUtils.getLastMsgDate;
 
 public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> {
 
@@ -61,10 +62,10 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
 
         if (users.get(position).getIsGroup().equals("true")) {
             getGroupInfo(users.get(position).getId(), holder);
-            lastMessage(users.get(position).getId(), holder, true);
+            lastMessage(users.get(position).getId(), holder, true, users.get(position).getTime());
         } else {
             getUserInfo(users.get(position).getId(), holder);
-            lastMessage(users.get(position).getId(), holder, false);
+            lastMessage(users.get(position).getId(), holder, false, users.get(position).getTime());
         }
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -91,7 +92,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         private CircleImageView userImage;
-        private TextView userName, lastMsg, unreadText;
+        private TextView userName, lastMsg, unreadText, lastMsgDate;
         private ImageView status;
         private View unreadView;
 
@@ -103,6 +104,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
             lastMsg = itemView.findViewById(R.id.tv_lastMsg);
             unreadView = itemView.findViewById(R.id.view3);
             unreadText = itemView.findViewById(R.id.textView32);
+            lastMsgDate = itemView.findViewById(R.id.textView49);
         }
     }
 
@@ -188,7 +190,8 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
 
     }
 
-    private void lastMessage(final String userId, final ViewHolder holder, final boolean isGroup) {
+    private void lastMessage(final String userId, final ViewHolder holder, final boolean isGroup, String time) {
+        holder.lastMsgDate.setText(getLastMsgDate(Long.parseLong(time)));
         theLastMessage = "default";
         final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         mDatabaseReference.child(chatTableName).addValueEventListener(new ValueEventListener() {
@@ -207,15 +210,13 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
                                 if (chat.isIsseen()) {
                                     holder.unreadView.setVisibility(View.GONE);
                                     holder.unreadText.setVisibility(View.GONE);
-                                    holder.userName.setTypeface(holder.userName.getTypeface(), Typeface.NORMAL);
-                                    holder.lastMsg.setTypeface(holder.lastMsg.getTypeface(), Typeface.NORMAL);
+                                    holder.lastMsgDate.setTextColor(Color.parseColor("#a4a4a4"));
                                 } else {
                                     holder.unreadView.setVisibility(View.VISIBLE);
                                     holder.unreadText.setVisibility(View.VISIBLE);
                                     unreadMsg = (unreadMsg + 1);
                                     holder.unreadText.setText(String.valueOf(unreadMsg));
-                                    holder.userName.setTypeface(holder.userName.getTypeface(), Typeface.BOLD);
-                                    holder.lastMsg.setTypeface(holder.lastMsg.getTypeface(), Typeface.BOLD);
+                                    holder.lastMsgDate.setTextColor(Color.parseColor("#0067CE"));
                                 }
                             }
                         }

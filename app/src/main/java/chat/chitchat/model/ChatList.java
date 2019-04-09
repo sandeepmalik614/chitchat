@@ -4,7 +4,7 @@ public class ChatList {
 
     private String id;
     private String isGroup;
-    private String  time;
+    private String time;
 
     public ChatList(String id, String isGroup, String time) {
         this.id = id;

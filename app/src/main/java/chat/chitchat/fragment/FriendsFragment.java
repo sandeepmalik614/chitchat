@@ -95,6 +95,7 @@ public class FriendsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_friends, container, false);
+        initView();
         return view;
     }
 
@@ -528,18 +529,18 @@ public class FriendsFragment extends Fragment {
         });
     }
 
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if (isVisibleToUser) {
-            Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    initView();
-                }
-            }, 20);
-        }
-    }
+//    @Override
+//    public void setUserVisibleHint(boolean isVisibleToUser) {
+//        super.setUserVisibleHint(isVisibleToUser);
+//        if (isVisibleToUser) {
+//            Handler handler = new Handler();
+//            handler.postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    initView();
+//                }
+//            }, 20);
+//        }
+//    }
 
 }

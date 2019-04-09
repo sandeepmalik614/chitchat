@@ -28,6 +28,7 @@ import chat.chitchat.model.ParticipantList;
 
 import static chat.chitchat.helper.AppConstant.userFriendListTableName;
 import static chat.chitchat.helper.AppConstant.userTableName;
+import static chat.chitchat.helper.AppUtils.userStatus;
 
 public class CreateGroupActivity extends AppCompatActivity {
 
@@ -136,6 +137,18 @@ public class CreateGroupActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        userStatus("online");
+        super.onStart();
+    }
+
+    @Override
+    protected void onPause() {
+        userStatus(String.valueOf(System.currentTimeMillis()));
+        super.onPause();
     }
 
 }

@@ -49,7 +49,9 @@ public class FriendRequestFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return view = inflater.inflate(R.layout.fragment_friend_request, container, false);
+        view = inflater.inflate(R.layout.fragment_friend_request, container, false);
+        initView();
+        return view;
     }
 
     private void initView() {
@@ -102,18 +104,18 @@ public class FriendRequestFragment extends Fragment {
 
     }
 
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if (isVisibleToUser) {
-            Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    initView();
-                }
-            }, 20);
-        }
-    }
+//    @Override
+//    public void setUserVisibleHint(boolean isVisibleToUser) {
+//        super.setUserVisibleHint(isVisibleToUser);
+//        if (isVisibleToUser) {
+//            Handler handler = new Handler();
+//            handler.postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    initView();
+//                }
+//            }, 20);
+//        }
+//    }
 
 }

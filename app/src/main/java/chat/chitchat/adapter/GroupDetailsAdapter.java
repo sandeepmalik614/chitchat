@@ -2,6 +2,7 @@ package chat.chitchat.adapter;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -109,7 +110,12 @@ public class GroupDetailsAdapter extends RecyclerView.Adapter<GroupDetailsAdapte
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        Glide.with(context).load(dataSnapshot.child("imageUrl").getValue().toString()).into(holder.userImage);
+                        try{
+                            Glide.with(context).load(dataSnapshot.child("imageUrl").getValue().toString()).into(holder.userImage);
+                        }catch (Exception e){
+                            Log.d("TAG", "GroupDetailsAdapterGlideError: "+e.getMessage());
+                        }
+
                     }
 
                     @Override

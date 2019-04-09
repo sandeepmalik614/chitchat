@@ -24,6 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -404,13 +405,9 @@ public class UserMessageActivity extends AppCompatActivity {
         senderUserRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (!dataSnapshot.exists()) {
                     senderUserRef.child("id").setValue(userId);
                     senderUserRef.child("isGroup").setValue("false");
                     senderUserRef.child("time").setValue(String.valueOf(System.currentTimeMillis()));
-                } else {
-                    senderUserRef.child("time").setValue(String.valueOf(System.currentTimeMillis()));
-                }
             }
 
             @Override
@@ -426,13 +423,9 @@ public class UserMessageActivity extends AppCompatActivity {
         receiverUserRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (!dataSnapshot.exists()) {
                     receiverUserRef.child("id").setValue(firebaseUser.getUid());
                     receiverUserRef.child("isGroup").setValue("false");
                     receiverUserRef.child("time").setValue(String.valueOf(System.currentTimeMillis()));
-                } else {
-                    receiverUserRef.child("time").setValue(String.valueOf(System.currentTimeMillis()));
-                }
             }
 
             @Override

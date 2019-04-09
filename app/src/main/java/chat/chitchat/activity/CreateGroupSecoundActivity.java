@@ -47,6 +47,7 @@ import static chat.chitchat.helper.AppUtils.sendNotification;
 import static chat.chitchat.helper.AppUtils.updateGroupDesc;
 import static chat.chitchat.helper.AppUtils.updateGroupImage;
 import static chat.chitchat.helper.AppUtils.updateGroupName;
+import static chat.chitchat.helper.AppUtils.userStatus;
 
 public class CreateGroupSecoundActivity extends AppCompatActivity {
 
@@ -253,5 +254,17 @@ public class CreateGroupSecoundActivity extends AppCompatActivity {
             imageUri = data.getData();
             Glide.with(this).load(imageUri).into(userImage);
         }
+    }
+
+    @Override
+    protected void onStart() {
+        userStatus("online");
+        super.onStart();
+    }
+
+    @Override
+    protected void onPause() {
+        userStatus(String.valueOf(System.currentTimeMillis()));
+        super.onPause();
     }
 }

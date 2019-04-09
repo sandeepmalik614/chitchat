@@ -1,6 +1,7 @@
 package chat.chitchat.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -75,8 +76,12 @@ public class AddGroupAllFriendsAdapter extends RecyclerView.Adapter<AddGroupAllF
         mUserDatabase.child(AppConstant.profileImageTable).child(participantLists.get(pos).getFriend_id()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Glide.with(context).load(dataSnapshot.child("imageUrl").getValue().toString()).into(holder.userImage);
-                participantLists.get(pos).setImage(dataSnapshot.child("imageUrl").getValue().toString());
+                try {
+                    Glide.with(context).load(dataSnapshot.child("imageUrl").getValue().toString()).into(holder.userImage);
+                    participantLists.get(pos).setImage(dataSnapshot.child("imageUrl").getValue().toString());
+                }catch (Exception e){
+                    Log.d("TAG", "AddGroupAllFriendesAdapterError "+e.getMessage());
+                }
             }
 
             @Override

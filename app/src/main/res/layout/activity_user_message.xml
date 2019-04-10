@@ -7,11 +7,6 @@
     android:background="#e4e4e4"
     tools:context=".activity.UserMessageActivity">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/abl_msg"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/messagetoolbar"
             android:layout_width="match_parent"
@@ -54,13 +49,12 @@
 
         </androidx.appcompat.widget.Toolbar>
 
-    </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_msg"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/abl_msg"
+        android:layout_below="@id/messagetoolbar"
         android:layout_above="@id/rl_msg"/>
 
     <RelativeLayout
@@ -75,6 +69,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:hint="blocked"
+            android:visibility="gone"
             android:layout_centerInParent="true"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"/>

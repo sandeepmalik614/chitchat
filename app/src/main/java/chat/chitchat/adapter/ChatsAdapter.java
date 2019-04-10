@@ -3,6 +3,7 @@ package chat.chitchat.adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -175,10 +176,14 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
         mDatabaseReference.child(groupImageTable).child(id).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.child("groupImageUrl").getValue().toString().equals("default")) {
-                    holder.userImage.setBackgroundResource(R.drawable.ic_group);
-                } else {
-                    Glide.with(context).load(dataSnapshot.child("groupImageUrl").getValue().toString()).into(holder.userImage);
+                try {
+                    if (dataSnapshot.child("groupImageUrl").getValue().toString().equals("default")) {
+                        holder.userImage.setBackgroundResource(R.drawable.ic_group);
+                    } else {
+                        Glide.with(context).load(dataSnapshot.child("groupImageUrl").getValue().toString()).into(holder.userImage);
+                    }
+                }catch (Exception e){
+                    Log.d("TAG", "ChatAdapterGroupImageError: "+e.getMessage());
                 }
             }
 

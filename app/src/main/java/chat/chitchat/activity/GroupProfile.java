@@ -266,7 +266,8 @@ public class GroupProfile extends AppCompatActivity {
         });
 
         /*getting description*/
-        mDatabaseReference.child(AppConstant.groupDescTable).child(groupId).addValueEventListener(new ValueEventListener() {
+        mDatabaseReference.child(AppConstant.groupDescTable).child(groupId)
+                .addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (groupDesc != null) {

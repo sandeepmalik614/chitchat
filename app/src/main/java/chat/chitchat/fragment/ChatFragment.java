@@ -34,6 +34,7 @@ import chat.chitchat.model.ChatList;
 import io.fabric.sdk.android.services.common.SafeToast;
 
 import static chat.chitchat.helper.AppConstant.chatListTableName;
+import static chat.chitchat.helper.AppUtils.isConnectionAvailable;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -69,7 +70,7 @@ public class ChatFragment extends Fragment {
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         chatLists = new ArrayList<>();
 
-        if (!AppUtils.isConnectionAvailable(getActivity())) {
+        if (!isConnectionAvailable(getActivity())) {
             Toast.makeText(getActivity(), "Please check your internet connection", Toast.LENGTH_SHORT).show();
         }
 

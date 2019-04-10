@@ -194,27 +194,29 @@ public class CreateGroupSecoundActivity extends AppCompatActivity {
             final int finalI = i;
             userRef.child(participantLists.get(i).getFriend_id()).child(groupId)
                     .addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    userRef.child(participantLists.get(finalI).getFriend_id()).child(groupId).child("id").setValue(groupId);
-                    userRef.child(participantLists.get(finalI).getFriend_id()).child(groupId).child("isGroup").setValue("true");
-                    userRef.child(participantLists.get(finalI).getFriend_id()).child(groupId).child("time").setValue(String.valueOf(System.currentTimeMillis()));
-                }
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            userRef.child(participantLists.get(finalI).getFriend_id()).child(groupId).child("id").setValue(groupId);
+                            userRef.child(participantLists.get(finalI).getFriend_id()).child(groupId).child("isGroup").setValue("true");
+                            userRef.child(participantLists.get(finalI).getFriend_id()).child(groupId).child("time").setValue(String.valueOf(System.currentTimeMillis()));
+                        }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                }
-            });
-                sendNotification("Group", firebaseUser.getUid(), participantLists.get(i).getFriend_id(),
-                participantLists.get(i).getName(), "added to you in a group");
+                        }
+                    });
+            sendNotification("Group", firebaseUser.getUid(), participantLists.get(i).getFriend_id(),
+                    participantLists.get(i).getName(), "added to you in a group");
 
             if (i == (participantLists.size() - 1)) {
-                pd.dismiss();
-                Intent intent = new Intent(this, MainActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                finish();
+                if (imageUri == null) {
+                    pd.dismiss();
+                    Intent intent = new Intent(this, MainActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                }
                 break;
             }
         }
@@ -241,6 +243,11 @@ public class CreateGroupSecoundActivity extends AppCompatActivity {
                     Uri downUri = task.getResult();
                     String downloadUrl = downUri.toString();
                     updateGroupImage(downloadUrl, groupId);
+                    pd.dismiss();
+                    Intent intent = new Intent(CreateGroupSecoundActivity.this, MainActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
                 }
             }
         });

@@ -71,9 +71,13 @@
             android:name="io.fabric.ApiKey"
             android:value="f2901f9ce4c70de49dccdb1fd55b07701e091a1e" />
 
-        <activity android:name=".activity.GroupProfile"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".activity.AddGroupParticipantActivity"
+        <activity
+            android:name=".activity.GroupProfile"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.AddGroupParticipantActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".activity.GroupMessageActvity"
             android:screenOrientation="portrait"/>
     </application>
 

@@ -5,6 +5,7 @@ public class ChatList {
     private String id;
     private String isGroup;
     private String time;
+    private String imageUrl;
 
     public ChatList(String id, String isGroup, String time) {
         this.id = id;
@@ -13,6 +14,14 @@ public class ChatList {
     }
 
     public ChatList() {
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public String getIsGroup() {

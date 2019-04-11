@@ -55,6 +55,7 @@ import static chat.chitchat.helper.AppConstant.reportTableName;
 import static chat.chitchat.helper.AppConstant.userFriendListTableName;
 import static chat.chitchat.helper.AppConstant.userTableName;
 import static chat.chitchat.helper.AppPrefrences.getUserName;
+import static chat.chitchat.helper.AppUtils.seeFullImage;
 import static chat.chitchat.helper.AppUtils.sendNotification;
 
 
@@ -76,6 +77,7 @@ public class FriendsFragment extends Fragment {
     private FirebaseUser firebaseUser;
     private DatabaseReference mDatabaseReference;
     private Dialog profileDialog;
+    private String dialogUserImage;
 
     private FriendClickListner friendClickListner = new FriendClickListner() {
         @Override
@@ -295,6 +297,13 @@ public class FriendsFragment extends Fragment {
             btn_add.setVisibility(View.VISIBLE);
         }
 
+        img_userDialog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                seeFullImage(getActivity(), img_userDialog, dialogUserImage);
+            }
+        });
+
         mDatabaseReference.child(reportTableName).child(id).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -412,6 +421,8 @@ public class FriendsFragment extends Fragment {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     Glide.with(getActivity()).load(dataSnapshot.child("imageUrl").getValue().toString())
                             .into(img_userDialog);
+
+                dialogUserImage = dataSnapshot.child("imageUrl").getValue().toString();
             }
 
             @Override

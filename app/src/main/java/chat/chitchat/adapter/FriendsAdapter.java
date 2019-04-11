@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import chat.chitchat.R;
 import chat.chitchat.activity.UserMessageActivity;
 import chat.chitchat.helper.AppConstant;
+import chat.chitchat.helper.AppUtils;
 import chat.chitchat.listner.FriendClickListner;
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -31,6 +32,7 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
     private ArrayList<String> idList;
     private DatabaseReference mDatabaseReference;
     private FriendClickListner friendClickListner;
+    private ArrayList<String> imageIdList = new ArrayList<>();
 
     public FriendsAdapter(Context context, ArrayList<String> idList, DatabaseReference mDatabaseReference,
                           FriendClickListner friendClickListner) {
@@ -81,6 +83,7 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
                 }else {
                     Glide.with(context).load(dataSnapshot.child("imageUrl").getValue().toString()).into(holder.userImage);
                 }
+                imageIdList.add(dataSnapshot.child("imageUrl").getValue().toString());
             }
 
             @Override
@@ -123,6 +126,13 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
                 Intent intent = new Intent(context, UserMessageActivity.class);
                 intent.putExtra("userid", idList.get(pos));
                 context.startActivity(intent);
+            }
+        });
+
+        holder.userImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AppUtils.seeFullImage(context, holder.userImage, imageIdList.get(pos));
             }
         });
     }

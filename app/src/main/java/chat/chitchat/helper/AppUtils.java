@@ -1,17 +1,35 @@
 package chat.chitchat.helper;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.ActivityOptions;
 import android.app.NotificationManager;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.icu.text.SimpleDateFormat;
+import android.media.ExifInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.format.DateFormat;
+import android.util.Log;
+import android.util.Pair;
+import android.view.View;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -20,7 +38,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,12 +54,15 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
 import chat.chitchat.R;
+import chat.chitchat.activity.ImageViewActivity;
+import chat.chitchat.activity.ProfileActivity;
 import chat.chitchat.notification.ApiInterface;
 import chat.chitchat.notification.Data;
 import chat.chitchat.notification.MyResponse;
 import chat.chitchat.notification.RetrofitClient;
 import chat.chitchat.notification.Sender;
 import chat.chitchat.notification.Token;
+import de.hdodenhof.circleimageview.CircleImageView;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -49,8 +76,10 @@ import static chat.chitchat.helper.AppConstant.groupNameTable;
 import static chat.chitchat.helper.AppConstant.profileImageTable;
 import static chat.chitchat.helper.AppConstant.profileNameTable;
 import static chat.chitchat.helper.AppConstant.tokenTableName;
+import static chat.chitchat.helper.AppConstant.uploadTableName;
 import static chat.chitchat.helper.AppPrefrences.getFirebaseToken;
 
+@SuppressLint("NewApi")
 public class AppUtils {
 
     public static void userStatus(String status) {
@@ -309,54 +338,6 @@ public class AppUtils {
         }
     }
 
-    public static void settingDialog(final Context context) {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(context, R.style.DialogTheme);
-        alertDialog.setMessage("You Have To Give Permission From Your Device Setting To go in Setting Please Click on Settings Button");
-        alertDialog.setCancelable(true);
-        alertDialog.setPositiveButton("Go To Settings", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                Uri uri = Uri.fromParts("package", context.getPackageName(), null);
-                intent.setData(uri);
-                context.startActivity(intent);
-            }
-        });
-        alertDialog.show();
-    }
-
-    public static String filterNumber(String number) {
-        if (number == null) {
-            number = "112";
-            return number;
-        } else {
-            number = number.replace(" ", "");
-            number = number.replace("-", "");
-            number = number.replace("(", "");
-            number = number.replace(")", "");
-            number = number.replace("+91", "");
-            String upToNCharacters = number.substring(0, Math.min(number.length(), 1));
-            if (number.length() == 12) {
-                if (upToNCharacters.equals("91")) {
-                    StringBuilder str = new StringBuilder(number);
-                    str.delete(0, 2);
-                    number = str.toString();
-                }
-            } else if (number.length() == 11) {
-                StringBuilder str = new StringBuilder(number);
-                str.delete(0, 1);
-                number = str.toString();
-            }
-        }
-        return number;
-    }
-
-    public static void clearNotification(Context context) {
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancelAll();
-    }
-
     public static void sendNotification(final String header, final String currentUserId, final String receiver, final String username, final String msg) {
         DatabaseReference tokens = FirebaseDatabase.getInstance().getReference(tokenTableName);
         Query query = tokens.orderByKey().equalTo(receiver);
@@ -402,7 +383,6 @@ public class AppUtils {
         return (mNetworkInfo != null) && (mNetworkInfo.isConnected());
     }
 
-    @SuppressLint("NewApi")
     public static String getTimeAgo(long millis) {
 
         long seconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - millis);
@@ -428,5 +408,63 @@ public class AppUtils {
             SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss aaa");
             return formatter.format(new Date(millis));
         }
+    }
+
+    public static void uploadImageToServer(final Context context, Bitmap bitmap,
+                                           final boolean isGroup, final String id) {
+        StorageReference mImageStorage = FirebaseStorage.getInstance().getReference();
+        final StorageReference ref = mImageStorage.child(uploadTableName)
+                .child(id + ".jpg");
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 40, baos);
+        byte[] data = baos.toByteArray();
+        final ProgressDialog pd = new ProgressDialog(context);
+        pd.setMessage("Uploading image...");
+        pd.setCancelable(false);
+        pd.show();
+
+        final UploadTask uploadTask = ref.putBytes(data);
+        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                    @Override
+                    public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                        if (!task.isSuccessful()) {
+                            throw task.getException();
+                        }
+                        return ref.getDownloadUrl();
+                    }
+                }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Uri> task) {
+                        if (task.isSuccessful()) {
+                            Uri downUri = task.getResult();
+                            if(isGroup){
+                                updateGroupImage(downUri.toString(), id);
+                            }else{
+                                updateUserImage(downUri.toString());
+                            }
+                        }
+                        pd.dismiss();
+                    }
+                });
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(context, "Failed " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public static void seeFullImage(Context context, CircleImageView myImage, String imageUrl){
+        Intent intent = new Intent(context, ImageViewActivity.class);
+        Pair[] pairs = new Pair[1];
+        pairs[0] = new Pair<View, String>(myImage, "fullImage");
+        ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation((Activity) context, pairs);
+        intent.putExtra("fullImage", imageUrl);
+        context.startActivity(intent, options.toBundle());
     }
 }

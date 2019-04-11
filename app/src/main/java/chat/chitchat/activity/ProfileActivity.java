@@ -1,8 +1,11 @@
 package chat.chitchat.activity;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -11,7 +14,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -25,8 +27,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -45,8 +48,8 @@ import static chat.chitchat.helper.AppConstant.profileNameTable;
 import static chat.chitchat.helper.AppConstant.reportTableName;
 import static chat.chitchat.helper.AppConstant.uploadTableName;
 import static chat.chitchat.helper.AppConstant.userTableName;
-import static chat.chitchat.helper.AppUtils.getMyPrettyDate;
-import static chat.chitchat.helper.AppUtils.updateUserImage;
+import static chat.chitchat.helper.AppUtils.seeFullImage;
+import static chat.chitchat.helper.AppUtils.uploadImageToServer;
 import static chat.chitchat.helper.AppUtils.userStatus;
 
 
@@ -65,7 +68,7 @@ public class ProfileActivity extends AppCompatActivity {
     private static final int IMAGE_REQUEST = 1;
     private ProgressDialog pd;
     private Toolbar toolbar;
-    private boolean isProfileImage = false;
+    private String imageUrl;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -143,6 +146,13 @@ public class ProfileActivity extends AppCompatActivity {
                 builder.show();
             }
         });
+
+        userImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                seeFullImage(ProfileActivity.this, userImage, AppPrefrences.getUserImage(ProfileActivity.this));
+            }
+        });
     }
 
     private void getUserProfile() {
@@ -176,11 +186,6 @@ public class ProfileActivity extends AppCompatActivity {
                 Glide.with(getApplicationContext()).load(dataSnapshot.child("imageUrl").getValue().toString())
                         .into(userImage);
                 AppPrefrences.setUserImage(ProfileActivity.this, dataSnapshot.child("imageUrl").getValue().toString());
-                if (dataSnapshot.child("imageUrl").getValue().toString().equals("default")) {
-                    isProfileImage = false;
-                } else {
-                    isProfileImage = true;
-                }
             }
 
             @Override
@@ -250,10 +255,8 @@ public class ProfileActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             userImage.setImageDrawable(null);
-                            isProfileImage = false;
                             Toast.makeText(ProfileActivity.this, "Profile pic is removed successfully", Toast.LENGTH_SHORT).show();
                         } else {
-                            isProfileImage = true;
                             Toast.makeText(ProfileActivity.this, "" + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -281,30 +284,15 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == IMAGE_REQUEST && resultCode == RESULT_OK) {
-            pd.show();
-            Uri imageUri = data.getData();
-            final StorageReference filePath = mImageStorage.child(uploadTableName)
-                    .child(firebaseUser.getUid() + ".jpg");
-
-            filePath.putFile(imageUri).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-                @Override
-                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                    if (!task.isSuccessful()) {
-                        throw task.getException();
-                    }
-                    return filePath.getDownloadUrl();
-                }
-            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                @Override
-                public void onComplete(@NonNull Task<Uri> task) {
-                    if (task.isSuccessful()) {
-                        Uri downUri = task.getResult();
-                        String downloadUrl = downUri.toString();
-                        updateUserImage(downloadUrl);
-                        pd.dismiss();
-                    }
-                }
-            });
+            Uri selectedImage = data.getData();
+            InputStream imageStream = null;
+            try {
+                imageStream = getContentResolver().openInputStream(selectedImage);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            Bitmap bitmap = BitmapFactory.decodeStream(imageStream);
+            uploadImageToServer(this, bitmap, false, firebaseUser.getUid());
         }
     }
 

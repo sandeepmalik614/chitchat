@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import chat.chitchat.R;
+import chat.chitchat.activity.GroupMessageActvity;
 import chat.chitchat.activity.GroupProfile;
 import chat.chitchat.activity.UserMessageActivity;
 import chat.chitchat.model.Chat;
@@ -37,6 +38,7 @@ import static chat.chitchat.helper.AppConstant.groupNameTable;
 import static chat.chitchat.helper.AppConstant.profileImageTable;
 import static chat.chitchat.helper.AppConstant.profileNameTable;
 import static chat.chitchat.helper.AppUtils.getLastMsgDate;
+import static chat.chitchat.helper.AppUtils.seeFullImage;
 
 public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> {
 
@@ -62,10 +64,10 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
     public void onBindViewHolder(@NonNull final ChatsAdapter.ViewHolder holder, final int position) {
 
         if (users.get(position).getIsGroup().equals("true")) {
-            getGroupInfo(users.get(position).getId(), holder);
+            getGroupInfo(users.get(position).getId(), holder, position);
             lastUserMessage(users.get(position).getId(), holder, true, users.get(position).getTime());
         } else {
-            getUserInfo(users.get(position).getId(), holder);
+            getUserInfo(users.get(position).getId(), holder, position);
             lastUserMessage(users.get(position).getId(), holder, false, users.get(position).getTime());
         }
 
@@ -74,13 +76,22 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
             public void onClick(View v) {
                 Intent intent = null;
                 if (users.get(position).getIsGroup().equals("true")) {
-                    intent = new Intent(context, GroupProfile.class);
+                    intent = new Intent(context, GroupMessageActvity.class);
+                    intent.putExtra("groupId", users.get(position).getId());
+                    intent.putExtra("groupName", holder.userName.getText());
+                    intent.putExtra("groupImage", users.get(position).getImageUrl());
                 } else {
                     intent = new Intent(context, UserMessageActivity.class);
+                    intent.putExtra("userid", users.get(position).getId());
                 }
-
-                intent.putExtra("userid", users.get(position).getId());
                 context.startActivity(intent);
+            }
+        });
+
+        holder.userImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                seeFullImage(context, holder.userImage, users.get(position).getImageUrl());
             }
         });
     }
@@ -109,7 +120,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
         }
     }
 
-    private void getUserInfo(String id, final ViewHolder holder) {
+    private void getUserInfo(String id, final ViewHolder holder, final int position) {
         mDatabaseReference.child(profileNameTable).child(id).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -130,8 +141,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
                 } else {
                     Glide.with(context).load(dataSnapshot.child("imageUrl").getValue().toString()).into(holder.userImage);
                 }
-
-
+                users.get(position).setImageUrl(dataSnapshot.child("imageUrl").getValue().toString());
             }
 
             @Override
@@ -160,7 +170,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
         });
     }
 
-    private void getGroupInfo(String id, final ViewHolder holder) {
+    private void getGroupInfo(String id, final ViewHolder holder, final int position) {
         mDatabaseReference.child(groupNameTable).child(id).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -182,6 +192,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
                     } else {
                         Glide.with(context).load(dataSnapshot.child("groupImageUrl").getValue().toString()).into(holder.userImage);
                     }
+                    users.get(position).setImageUrl(dataSnapshot.child("groupImageUrl").getValue().toString());
                 }catch (Exception e){
                     Log.d("TAG", "ChatAdapterGroupImageError: "+e.getMessage());
                 }

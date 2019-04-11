@@ -15,6 +15,9 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
+            android:name=".activity.ImageViewActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".activity.MainActivity"
             android:screenOrientation="portrait" />
         <activity
@@ -77,8 +80,9 @@
         <activity
             android:name=".activity.AddGroupParticipantActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".activity.GroupMessageActvity"
-            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".activity.GroupMessageActvity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

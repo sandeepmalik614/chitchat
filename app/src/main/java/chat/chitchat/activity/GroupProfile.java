@@ -18,6 +18,8 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.os.Bundle;
@@ -48,6 +50,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -68,6 +72,7 @@ import static chat.chitchat.helper.AppConstant.userTableName;
 import static chat.chitchat.helper.AppPrefrences.getUserName;
 import static chat.chitchat.helper.AppUtils.sendNotification;
 import static chat.chitchat.helper.AppUtils.updateGroupImage;
+import static chat.chitchat.helper.AppUtils.uploadImageToServer;
 import static chat.chitchat.helper.AppUtils.userStatus;
 
 public class GroupProfile extends AppCompatActivity {
@@ -139,7 +144,7 @@ public class GroupProfile extends AppCompatActivity {
         friendList = new ArrayList<>();
         profileDialog = new Dialog(this);
 
-        groupId = getIntent().getStringExtra("userid");
+        groupId = getIntent().getStringExtra("groupId");
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         mImageStorage = FirebaseStorage.getInstance().getReference();
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
@@ -410,28 +415,15 @@ public class GroupProfile extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == IMAGE_REQUEST && resultCode == RESULT_OK) {
-            Uri imageUri = data.getData();
-            final StorageReference filePath = mImageStorage.child(uploadTableName)
-                    .child(groupId + ".jpg");
-
-            filePath.putFile(imageUri).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-                @Override
-                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                    if (!task.isSuccessful()) {
-                        throw task.getException();
-                    }
-                    return filePath.getDownloadUrl();
-                }
-            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                @Override
-                public void onComplete(@NonNull Task<Uri> task) {
-                    if (task.isSuccessful()) {
-                        Uri downUri = task.getResult();
-                        String downloadUrl = downUri.toString();
-                        updateGroupImage(downloadUrl, groupId);
-                    }
-                }
-            });
+            Uri selectedImage = data.getData();
+            InputStream imageStream = null;
+            try {
+                imageStream = getContentResolver().openInputStream(selectedImage);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            Bitmap bitmap = BitmapFactory.decodeStream(imageStream);
+            uploadImageToServer(this, bitmap, true, groupId);
         }
     }
 

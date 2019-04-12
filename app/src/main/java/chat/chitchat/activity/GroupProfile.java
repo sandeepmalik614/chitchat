@@ -70,6 +70,7 @@ import static chat.chitchat.helper.AppConstant.uploadTableName;
 import static chat.chitchat.helper.AppConstant.userFriendListTableName;
 import static chat.chitchat.helper.AppConstant.userTableName;
 import static chat.chitchat.helper.AppPrefrences.getUserName;
+import static chat.chitchat.helper.AppUtils.seeFullImage;
 import static chat.chitchat.helper.AppUtils.sendNotification;
 import static chat.chitchat.helper.AppUtils.updateGroupImage;
 import static chat.chitchat.helper.AppUtils.uploadImageToServer;
@@ -84,7 +85,7 @@ public class GroupProfile extends AppCompatActivity {
     private LinearLayout ll_exit;
     private TextView groupName, createdBy, groupDesc, exitGroup, reportGroup;
     private DatabaseReference mDatabaseReference;
-    private String groupId, currentUserId;
+    private String groupId, currentUserId, userImageLink;
     private RecyclerView rv_groupDetails;
     private GroupDetailsAdapter groupDetailsAdapter;
     private FirebaseUser firebaseUser;
@@ -195,6 +196,13 @@ public class GroupProfile extends AppCompatActivity {
             }
         });
 
+        userImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                seeFullImage(GroupProfile.this, userImage, userImageLink);
+            }
+        });
+
         getGroupInfo();
     }
 
@@ -215,6 +223,8 @@ public class GroupProfile extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         Glide.with(GroupProfile.this).load(dataSnapshot.child("groupImageUrl")
                                 .getValue()).into(userImage);
+
+                        userImageLink = dataSnapshot.child("groupImageUrl").getValue().toString();
                     }
 
                     @Override

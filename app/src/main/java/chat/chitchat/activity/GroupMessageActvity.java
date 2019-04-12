@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import chat.chitchat.R;
+import chat.chitchat.helper.AppUtils;
 import chat.chitchat.model.ParticipantList;
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -25,6 +26,7 @@ import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
+import static chat.chitchat.helper.AppConstant.groupImageTable;
 import static chat.chitchat.helper.AppConstant.groupMemberTable;
 import static chat.chitchat.helper.AppConstant.profileNameTable;
 import static chat.chitchat.helper.AppConstant.userTableName;
@@ -34,7 +36,7 @@ public class GroupMessageActvity extends AppCompatActivity {
     private Toolbar toolbar;
     private TextView groupName, groupStatus;
     private ImageView groupInfo;
-    private String groupId;
+    private String groupId, groupImageLink;
     private ArrayList<String> mamberList;
     private CircleImageView img_toolbarGroup;
     private DatabaseReference mDatabaseReference;
@@ -53,7 +55,6 @@ public class GroupMessageActvity extends AppCompatActivity {
         mamberList = new ArrayList<>();
         groupId = getIntent().getStringExtra("groupId");
         groupName.setText(getIntent().getStringExtra("groupName"));
-        Glide.with(this).load(getIntent().getStringExtra("groupImage")).into(img_toolbarGroup);
 
         groupInfo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,6 +64,14 @@ public class GroupMessageActvity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        img_toolbarGroup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AppUtils.seeFullImage(GroupMessageActvity.this, img_toolbarGroup, groupImageLink);
+            }
+        });
+
         getGroupInfo();
 
     }
@@ -87,6 +96,20 @@ public class GroupMessageActvity extends AppCompatActivity {
                     });
                 }
 
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        mDatabaseReference.child(groupImageTable).child(groupId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Glide.with(GroupMessageActvity.this).load(dataSnapshot.child("groupImageUrl")
+                        .getValue()).into(img_toolbarGroup);
+                groupImageLink = dataSnapshot.child("groupImageUrl").getValue().toString();
             }
 
             @Override

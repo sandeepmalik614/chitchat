@@ -49,6 +49,7 @@ import static chat.chitchat.helper.AppConstant.profileImageTable;
 import static chat.chitchat.helper.AppConstant.profileNameTable;
 import static chat.chitchat.helper.AppConstant.userFriendListTableName;
 import static chat.chitchat.helper.AppUtils.getMyPrettyDate;
+import static chat.chitchat.helper.AppUtils.seeFullImage;
 import static chat.chitchat.helper.AppUtils.sendNotification;
 import static chat.chitchat.helper.AppUtils.userStatus;
 
@@ -68,7 +69,7 @@ public class UserMessageActivity extends AppCompatActivity {
     private MessageAdapter adapter;
     private ArrayList<Chat> mChat;
     private ValueEventListener seenListener;
-    private String userId, blockType;
+    private String userId, blockType, userImageLink;
     private boolean notify = false;
 
     @Override
@@ -134,6 +135,14 @@ public class UserMessageActivity extends AppCompatActivity {
                 );
             }
         });
+
+        userImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                seeFullImage(UserMessageActivity.this, userImage, userImageLink);
+            }
+        });
+
         getUser();
         isBlocked();
     }
@@ -237,7 +246,7 @@ public class UserMessageActivity extends AppCompatActivity {
                 } else {
                     Glide.with(getApplicationContext()).load(dataSnapshot.child("imageUrl").getValue().toString()).into(userImage);
                 }
-
+                userImageLink = dataSnapshot.child("imageUrl").getValue().toString();
                 readMessage(firebaseUser.getUid(), userId);
             }
 

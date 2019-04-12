@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import chat.chitchat.R;
+import chat.chitchat.helper.AppUtils;
 import chat.chitchat.model.ParticipantList;
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -34,9 +35,16 @@ public class ShowParticipantsAdapter extends RecyclerView.Adapter<ShowParticipan
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
         holder.userName.setText(participantLists.get(position).getName());
         Glide.with(context).load(participantLists.get(position).getImage()).into(holder.userImage);
+
+        holder.userImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AppUtils.seeFullImage(context, holder.userImage, participantLists.get(position).getImage());
+            }
+        });
     }
 
     @Override

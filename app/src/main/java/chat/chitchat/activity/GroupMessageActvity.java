@@ -37,7 +37,6 @@ public class GroupMessageActvity extends AppCompatActivity {
     private TextView groupName, groupStatus;
     private ImageView groupInfo;
     private String groupId, groupImageLink;
-    private ArrayList<String> mamberList;
     private CircleImageView img_toolbarGroup;
     private DatabaseReference mDatabaseReference;
 
@@ -52,7 +51,6 @@ public class GroupMessageActvity extends AppCompatActivity {
         groupInfo = findViewById(R.id.img_groupInfo);
         img_toolbarGroup = findViewById(R.id.img_toolbarGroup);
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
-        mamberList = new ArrayList<>();
         groupId = getIntent().getStringExtra("groupId");
         groupName.setText(getIntent().getStringExtra("groupName"));
 
@@ -80,13 +78,16 @@ public class GroupMessageActvity extends AppCompatActivity {
         mDatabaseReference.child(groupMemberTable).child(groupId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                mamberList.clear();
                 for(DataSnapshot snapshot : dataSnapshot.getChildren()){
                     mDatabaseReference.child(profileNameTable).child(snapshot.getKey())
                             .addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            mamberList.add(dataSnapshot.child("userName").getValue().toString());
+                            if(groupStatus.getText().toString().isEmpty()){
+                                groupStatus.setText(dataSnapshot.child("userName").getValue().toString());
+                            }else{
+                                groupStatus.setText(groupStatus.getText()+", "+dataSnapshot.child("userName").getValue().toString());
+                            }
                         }
 
                         @Override

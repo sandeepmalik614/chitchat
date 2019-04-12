@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import chat.chitchat.R;
 import chat.chitchat.helper.AppConstant;
+import chat.chitchat.helper.AppUtils;
 import chat.chitchat.listner.BlockClickListner;
 import chat.chitchat.listner.GroupClickListner;
 import chat.chitchat.model.GroupDetails;
@@ -31,6 +32,7 @@ public class GroupDetailsAdapter extends RecyclerView.Adapter<GroupDetailsAdapte
 
     private Context context;
     private ArrayList<GroupDetails> groupDetails;
+    private ArrayList<String> imageUrlList = new ArrayList<>();
     private DatabaseReference mReference;
     private FirebaseUser firebaseUser;
     private GroupClickListner clickListner;
@@ -67,6 +69,13 @@ public class GroupDetailsAdapter extends RecyclerView.Adapter<GroupDetailsAdapte
             @Override
             public void onClick(View v) {
               clickListner.onClick(groupDetails.get(position).getMemberId(), holder.userName.getText().toString() ,groupDetails.get(position).isAdmin());
+            }
+        });
+
+        holder.userImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AppUtils.seeFullImage(context, holder.userImage, imageUrlList.get(position));
             }
         });
     }
@@ -112,6 +121,7 @@ public class GroupDetailsAdapter extends RecyclerView.Adapter<GroupDetailsAdapte
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         try{
                             Glide.with(context).load(dataSnapshot.child("imageUrl").getValue().toString()).into(holder.userImage);
+                            imageUrlList.add(dataSnapshot.child("imageUrl").getValue().toString());
                         }catch (Exception e){
                             Log.d("TAG", "GroupDetailsAdapterGlideError: "+e.getMessage());
                         }

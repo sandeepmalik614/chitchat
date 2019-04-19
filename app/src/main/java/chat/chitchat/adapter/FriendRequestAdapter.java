@@ -1,6 +1,7 @@
 package chat.chitchat.adapter;
 
 import android.content.Context;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.LogRecord;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -65,6 +67,8 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
 
         holder.sendTime.setText(getTimeAgo(Long.parseLong(requestLists.get(position).getSend_time())));
+
+        startTimer(holder.sendTime, Long.parseLong(requestLists.get(position).getSend_time()));
 
         mUserDatabase.child(profileNameTable).child(requestIdLists.get(position)).addValueEventListener(new ValueEventListener() {
             @Override
@@ -128,6 +132,16 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
                 sendReminder(requestIdLists.get(position), holder.userName.getText().toString());
             }
         });
+    }
+
+    private void startTimer(final TextView sendTime, final long parseLong) {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                sendTime.setText(getTimeAgo(parseLong));
+                startTimer(sendTime, parseLong);
+            }
+        }, 10000);
     }
 
     @Override

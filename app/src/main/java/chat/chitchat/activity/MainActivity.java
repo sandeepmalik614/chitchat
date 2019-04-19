@@ -147,9 +147,9 @@ public class MainActivity extends AppCompatActivity {
         } else {
             reference = FirebaseDatabase.getInstance().getReference(chatTableName);
             viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
-            viewPagerAdapter.addFragment(new FriendRequestFragment(), "Request");
             viewPagerAdapter.addFragment(new ChatFragment(), "Chat");
             viewPagerAdapter.addFragment(new FriendsFragment(), "Friend");
+            viewPagerAdapter.addFragment(new FriendRequestFragment(), "Request");
             viewPager.setAdapter(viewPagerAdapter);
             tabLayout.setupWithViewPager(viewPager);
             reference.addValueEventListener(new ValueEventListener() {
@@ -164,9 +164,9 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     if (unread == 0) {
-                        tabLayout.getTabAt(1).setText("Chat");
+                        tabLayout.getTabAt(0).setText("Chat");
                     } else {
-                        tabLayout.getTabAt(1).setText("(" + unread + ")Chat");
+                        tabLayout.getTabAt(0).setText("(" + unread + ")Chat");
                     }
                 }
 
@@ -218,9 +218,9 @@ public class MainActivity extends AppCompatActivity {
                             unRespond++;
                         }
                         if (unRespond != 0) {
-                            tabLayout.getTabAt(0).setText("(" + unRespond + ")" + " Request");
+                            tabLayout.getTabAt(2).setText("(" + unRespond + ")" + " Request");
                         } else {
-                            tabLayout.getTabAt(0).setText("Request");
+                            tabLayout.getTabAt(2).setText("Request");
                         }
                     }
                 }

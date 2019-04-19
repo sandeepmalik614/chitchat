@@ -15,9 +15,11 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -71,8 +73,8 @@ public class FriendRequestFragment extends Fragment {
         mUserDatabase = FirebaseDatabase.getInstance().getReference();
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-
-        mFriendsDatabse.addValueEventListener(new ValueEventListener() {
+        Query query = mFriendsDatabse.orderByChild("send_time");
+        query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 progressBar.setVisibility(View.GONE);
@@ -87,6 +89,8 @@ public class FriendRequestFragment extends Fragment {
                     if (keyList.size() != 0) {
                         recyclerView.setVisibility(View.VISIBLE);
                         tv_noReq.setVisibility(View.GONE);
+                        Collections.reverse(keyList);
+                        Collections.reverse(requestArrayList);
                         friendRequestAdapter = new FriendRequestAdapter(getActivity(), mUserDatabase, keyList, requestArrayList, mCurrentUserId);
                         recyclerView.setAdapter(friendRequestAdapter);
                     } else {

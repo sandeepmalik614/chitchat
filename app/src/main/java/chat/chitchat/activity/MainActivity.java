@@ -256,9 +256,9 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(this, BlockedUserActivity.class));
                 return true;
 
-            case R.id.newGroup:
-                startActivity(new Intent(this, CreateGroupActivity.class));
-                return true;
+//            case R.id.newGroup:
+//                startActivity(new Intent(this, CreateGroupActivity.class));
+//                return true;
         }
 
         return true;

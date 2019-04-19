@@ -12,10 +12,10 @@
         android:title="Block List"
         app:showAsAction="never"/>
 
-    <item
-        android:id="@+id/newGroup"
-        android:title="New group"
-        app:showAsAction="never"/>
+    <!--<item-->
+        <!--android:id="@+id/newGroup"-->
+        <!--android:title="New group"-->
+        <!--app:showAsAction="never"/>-->
 
     <item
         android:id="@+id/logout"

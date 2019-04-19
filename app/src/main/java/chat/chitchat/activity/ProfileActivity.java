@@ -29,6 +29,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,6 +49,7 @@ import static chat.chitchat.helper.AppConstant.profileNameTable;
 import static chat.chitchat.helper.AppConstant.reportTableName;
 import static chat.chitchat.helper.AppConstant.uploadTableName;
 import static chat.chitchat.helper.AppConstant.userTableName;
+import static chat.chitchat.helper.AppUtils.rotateImageIfRequired;
 import static chat.chitchat.helper.AppUtils.seeFullImage;
 import static chat.chitchat.helper.AppUtils.uploadImageToServer;
 import static chat.chitchat.helper.AppUtils.userStatus;
@@ -292,7 +294,12 @@ public class ProfileActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             Bitmap bitmap = BitmapFactory.decodeStream(imageStream);
-            uploadImageToServer(this, bitmap, false, firebaseUser.getUid());
+
+            try {
+                uploadImageToServer(this, rotateImageIfRequired(bitmap, this, selectedImage), false, firebaseUser.getUid());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

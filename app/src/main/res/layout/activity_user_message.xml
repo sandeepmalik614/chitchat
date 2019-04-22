@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:emojicon="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#e4e4e4"
+    android:id="@+id/rootView"
     tools:context=".activity.UserMessageActivity">
 
         <androidx.appcompat.widget.Toolbar
@@ -74,14 +76,24 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"/>
 
-        <EditText
+        <ImageView
+            android:id="@+id/emoji_btn"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="6dp"
+            android:visibility="gone"
+            android:layout_centerVertical="true"
+            android:src="@drawable/smiley" />
+
+        <hani.momanii.supernova_emoji_library.Helper.EmojiconEditText
             android:id="@+id/edt_typeMsg"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Type a message"
             android:visibility="gone"
+            emojicon:emojiconSize="28sp"
             android:layout_marginLeft="5dp"
-            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/emoji_btn"
             android:layout_toLeftOf="@id/img_sendMsg"/>
 
         <ImageView
@@ -90,7 +102,7 @@
             android:layout_height="40dp"
             android:src="@drawable/ic_send_24dp"
             android:padding="5dp"
-            android:visibility="gone"
+            android:visibility="visible"
             android:layout_centerVertical="true"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true" />

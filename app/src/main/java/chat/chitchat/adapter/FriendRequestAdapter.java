@@ -2,6 +2,7 @@ package chat.chitchat.adapter;
 
 import android.content.Context;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import chat.chitchat.R;
+import chat.chitchat.helper.AppUtils;
 import chat.chitchat.model.RequestList;
 
 import static chat.chitchat.helper.AppConstant.friendRequestTableName;
@@ -45,6 +47,7 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
     private ArrayList<String> requestIdLists;
     private ArrayList<RequestList> requestLists;
     private String currentUserId = "";
+    private ArrayList<String> imageList = new ArrayList<>();
 
     public FriendRequestAdapter(Context context, DatabaseReference mUserDatabase,
                                 ArrayList<String> requestIdLists, ArrayList<RequestList> requestLists,
@@ -97,6 +100,7 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
                 } else {
                     Glide.with(context).load(dataSnapshot.child("imageUrl").getValue().toString()).into(holder.userImage);
                 }
+                imageList.add(dataSnapshot.child("imageUrl").getValue().toString());
             }
 
             @Override
@@ -130,6 +134,17 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
             @Override
             public void onClick(View v) {
                 sendReminder(requestIdLists.get(position), holder.userName.getText().toString());
+            }
+        });
+
+        holder.userImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(imageList.get(position).equals("default")){
+                    Log.d("TAG", "No Image in request");
+                }else{
+                    AppUtils.seeFullImage(context, null, imageList.get(position), holder.userImage);
+                }
             }
         });
     }

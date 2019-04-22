@@ -40,6 +40,8 @@ import chat.chitchat.adapter.MessageAdapter;
 import chat.chitchat.model.BlockedUserList;
 import chat.chitchat.model.Chat;
 import de.hdodenhof.circleimageview.CircleImageView;
+import hani.momanii.supernova_emoji_library.Actions.EmojIconActions;
+import hani.momanii.supernova_emoji_library.Helper.EmojiconEditText;
 
 import static chat.chitchat.helper.AppConstant.blockTableName;
 import static chat.chitchat.helper.AppConstant.chatListTableName;
@@ -58,8 +60,8 @@ public class UserMessageActivity extends AppCompatActivity {
 
     private CircleImageView userImage;
     private TextView username, status, blockText;
-    private EditText edt_message;
-    private ImageView send;
+    private EmojiconEditText edt_message;
+    private ImageView send, emoji_btn;
     private FirebaseUser firebaseUser;
     private DatabaseReference reference;
     private DatabaseReference mBlockedRference;
@@ -71,6 +73,8 @@ public class UserMessageActivity extends AppCompatActivity {
     private ValueEventListener seenListener;
     private String userId, blockType, userImageLink;
     private boolean notify = false;
+    private View rootView;
+    private EmojIconActions emojIcon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,10 +90,16 @@ public class UserMessageActivity extends AppCompatActivity {
         send = findViewById(R.id.img_sendMsg);
         recyclerView = findViewById(R.id.rv_msg);
         blockText = findViewById(R.id.tv_blockText);
+        rootView = findViewById(R.id.rootView);
+        emoji_btn = findViewById(R.id.emoji_btn);
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(linearLayoutManager);
+
+        emojIcon = new EmojIconActions(this, rootView, edt_message, emoji_btn);
+        emojIcon.ShowEmojIcon();
+        emojIcon.setIconsIds(R.drawable.ic_action_keyboard, R.drawable.smiley);
 
         userId = getIntent().getStringExtra("userid");
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -174,11 +184,13 @@ public class UserMessageActivity extends AppCompatActivity {
                 if (blockType.equals("not")) {
                     send.setVisibility(View.VISIBLE);
                     edt_message.setVisibility(View.VISIBLE);
+                    emoji_btn.setVisibility(View.VISIBLE);
                     blockText.setVisibility(View.GONE);
                     isFriend();
                 } else {
                     send.setVisibility(View.GONE);
                     edt_message.setVisibility(View.GONE);
+                    emoji_btn.setVisibility(View.GONE);
                     blockText.setVisibility(View.VISIBLE);
                     if (blockType.equals("other")) {
                         blockText.setText("You are Blocked by this user");
@@ -303,17 +315,20 @@ public class UserMessageActivity extends AppCompatActivity {
                 if (dataSnapshot == null) {
                     send.setVisibility(View.GONE);
                     edt_message.setVisibility(View.GONE);
+                    emoji_btn.setVisibility(View.GONE);
                     blockText.setVisibility(View.VISIBLE);
                     blockText.setText("This user is not in your friend list.");
                     status.setVisibility(View.GONE);
                 } else {
                     if (dataSnapshot.getValue() != null) {
                         send.setVisibility(View.VISIBLE);
+                        emoji_btn.setVisibility(View.VISIBLE);
                         edt_message.setVisibility(View.VISIBLE);
                         status.setVisibility(View.VISIBLE);
                         blockText.setVisibility(View.GONE);
                     } else {
                         send.setVisibility(View.GONE);
+                        emoji_btn.setVisibility(View.GONE);
                         edt_message.setVisibility(View.GONE);
                         blockText.setVisibility(View.VISIBLE);
                         blockText.setText("This user is not in your friend list.");

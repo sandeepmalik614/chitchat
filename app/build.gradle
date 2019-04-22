@@ -73,5 +73,8 @@ android {
         implementation 'com.squareup.retrofit2:retrofit:2.3.0'
         implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
         implementation 'com.crashlytics.sdk.android:crashlytics:2.9.9'
+
+        //library for emoji
+        implementation 'hani.momanii.supernova_emoji_library:supernova-emoji-library:0.0.2'
     }
 }

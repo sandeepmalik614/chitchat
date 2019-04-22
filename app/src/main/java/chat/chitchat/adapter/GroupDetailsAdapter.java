@@ -75,7 +75,7 @@ public class GroupDetailsAdapter extends RecyclerView.Adapter<GroupDetailsAdapte
         holder.userImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AppUtils.seeFullImage(context, holder.userImage, imageUrlList.get(position));
+                AppUtils.seeFullImage(context, holder.userImage, imageUrlList.get(position), null);
             }
         });
     }

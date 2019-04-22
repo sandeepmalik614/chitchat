@@ -13,12 +13,14 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import chat.chitchat.R;
 import chat.chitchat.helper.AppConstant;
+import chat.chitchat.helper.AppUtils;
 import chat.chitchat.listner.BlockClickListner;
 import chat.chitchat.listner.FriendClickListner;
 
@@ -30,6 +32,7 @@ public class SuggestionAdapter extends RecyclerView.Adapter<SuggestionAdapter.Vi
     private DatabaseReference mDatabaseReference;
     private FriendClickListner friendClickListner;
     private BlockClickListner sendRequestClickListner;
+    private ArrayList<String> imageList = new ArrayList<>();
 
     public SuggestionAdapter(Context context, ArrayList<String> idList, DatabaseReference mDatabaseReference,
                              FriendClickListner friendClickListner, BlockClickListner sendRequestClickListner) {
@@ -71,6 +74,8 @@ public class SuggestionAdapter extends RecyclerView.Adapter<SuggestionAdapter.Vi
                     Glide.with(context).load(dataSnapshot.child("imageUrl").getValue().toString()).into(holder.userImage);
                 }
 
+                imageList.add(dataSnapshot.child("imageUrl").getValue().toString());
+
             }
 
             @Override
@@ -93,6 +98,19 @@ public class SuggestionAdapter extends RecyclerView.Adapter<SuggestionAdapter.Vi
             public void onClick(View v) {
                 if (sendRequestClickListner != null) {
                     sendRequestClickListner.onClick(idList.get(position));
+                }
+            }
+        });
+
+        holder.userImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(imageList.get(position).equals("default")){
+                    if (friendClickListner != null) {
+                        friendClickListner.onClick("suggestion", idList.get(position));
+                    }
+                }else{
+                    AppUtils.seeFullImage(context, null, imageList.get(position), holder.userImage);
                 }
             }
         });

@@ -230,6 +230,7 @@ public class FriendsFragment extends Fragment {
                     tv_suggestion.setVisibility(View.VISIBLE);
                     rv_suggestion.setVisibility(View.VISIBLE);
                     rv_suggestion.setAdapter(suggestionAdapter);
+                    suggestionAdapter.notifyDataSetChanged();
                 }
 
             }
@@ -300,7 +301,7 @@ public class FriendsFragment extends Fragment {
         img_userDialog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                seeFullImage(getActivity(), img_userDialog, dialogUserImage);
+                seeFullImage(getActivity(), img_userDialog, dialogUserImage, null);
             }
         });
 

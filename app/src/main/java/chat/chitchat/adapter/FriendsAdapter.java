@@ -132,7 +132,7 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
         holder.userImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AppUtils.seeFullImage(context, holder.userImage, imageIdList.get(pos));
+                AppUtils.seeFullImage(context, holder.userImage, imageIdList.get(pos), null);
             }
         });
     }

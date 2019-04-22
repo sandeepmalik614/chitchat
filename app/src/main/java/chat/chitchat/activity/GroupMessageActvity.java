@@ -66,7 +66,7 @@ public class GroupMessageActvity extends AppCompatActivity {
         img_toolbarGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AppUtils.seeFullImage(GroupMessageActvity.this, img_toolbarGroup, groupImageLink);
+                AppUtils.seeFullImage(GroupMessageActvity.this, img_toolbarGroup, groupImageLink, null);
             }
         });
 

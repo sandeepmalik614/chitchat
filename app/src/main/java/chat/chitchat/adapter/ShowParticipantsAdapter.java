@@ -42,7 +42,7 @@ public class ShowParticipantsAdapter extends RecyclerView.Adapter<ShowParticipan
         holder.userImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AppUtils.seeFullImage(context, holder.userImage, participantLists.get(position).getImage());
+                AppUtils.seeFullImage(context, holder.userImage, participantLists.get(position).getImage(), null);
             }
         });
     }

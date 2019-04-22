@@ -23,6 +23,7 @@ import android.text.format.DateFormat;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.Continuation;
@@ -459,10 +460,14 @@ public class AppUtils {
         });
     }
 
-    public static void seeFullImage(Context context, CircleImageView myImage, String imageUrl){
+    public static void seeFullImage(Context context, CircleImageView myImage, String imageUrl, ImageView imageView){
         Intent intent = new Intent(context, ImageViewActivity.class);
         Pair[] pairs = new Pair[1];
-        pairs[0] = new Pair<View, String>(myImage, "fullImage");
+        if(myImage == null){
+            pairs[0] = new Pair<View, String>(imageView, "fullImage");
+        }else{
+            pairs[0] = new Pair<View, String>(myImage, "fullImage");
+        }
         ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation((Activity) context, pairs);
         intent.putExtra("fullImage", imageUrl);
         context.startActivity(intent, options.toBundle());

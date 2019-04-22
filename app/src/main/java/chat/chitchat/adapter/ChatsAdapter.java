@@ -91,7 +91,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
         holder.userImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                seeFullImage(context, holder.userImage, users.get(position).getImageUrl());
+                seeFullImage(context, holder.userImage, users.get(position).getImageUrl(), null);
             }
         });
     }

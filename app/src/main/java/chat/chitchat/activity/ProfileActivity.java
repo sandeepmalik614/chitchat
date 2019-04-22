@@ -152,7 +152,7 @@ public class ProfileActivity extends AppCompatActivity {
         userImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                seeFullImage(ProfileActivity.this, userImage, AppPrefrences.getUserImage(ProfileActivity.this));
+                seeFullImage(ProfileActivity.this, userImage, AppPrefrences.getUserImage(ProfileActivity.this), null);
             }
         });
     }

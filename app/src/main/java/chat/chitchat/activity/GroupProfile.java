@@ -199,7 +199,7 @@ public class GroupProfile extends AppCompatActivity {
         userImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                seeFullImage(GroupProfile.this, userImage, userImageLink);
+                seeFullImage(GroupProfile.this, userImage, userImageLink, null);
             }
         });
 

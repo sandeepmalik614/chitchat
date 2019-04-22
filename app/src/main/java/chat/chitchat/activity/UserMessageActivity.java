@@ -139,7 +139,7 @@ public class UserMessageActivity extends AppCompatActivity {
         userImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                seeFullImage(UserMessageActivity.this, userImage, userImageLink);
+                seeFullImage(UserMessageActivity.this, userImage, userImageLink, null);
             }
         });
 

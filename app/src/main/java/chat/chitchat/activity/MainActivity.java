@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         if ("android.intent.action.SEND".equals(action) && type != null && "text/plain".equals(type)) {
             Toast.makeText(this, ""+intent.getStringExtra("android.intent.extra.TEXT"), Toast.LENGTH_SHORT).show();
         }
-        
+
         startInternetCycle();
     }
 

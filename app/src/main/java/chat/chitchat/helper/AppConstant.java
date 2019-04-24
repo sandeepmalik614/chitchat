@@ -2,7 +2,7 @@ package chat.chitchat.helper;
 
 public class AppConstant {
 
-    public static final String userTableName = "Users";
+    public static final String userTable = "Users";
     public static final String mobileTableName = "MobileNumbers";
     public static final String chatTableName = "chats";
     public static final String uploadTableName = "profile_images";

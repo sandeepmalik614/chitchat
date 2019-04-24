@@ -22,7 +22,6 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.LogRecord;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -35,7 +34,7 @@ import static chat.chitchat.helper.AppConstant.friendRequestTableName;
 import static chat.chitchat.helper.AppConstant.profileImageTable;
 import static chat.chitchat.helper.AppConstant.profileNameTable;
 import static chat.chitchat.helper.AppConstant.userFriendListTableName;
-import static chat.chitchat.helper.AppConstant.userTableName;
+import static chat.chitchat.helper.AppConstant.userTable;
 import static chat.chitchat.helper.AppUtils.getTimeAgo;
 import static chat.chitchat.helper.AppUtils.sendNotification;
 
@@ -188,7 +187,7 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
     private void acceptFriendRequest(final String userId) {
         final DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
         final Map friendsMap = new HashMap();
-        DatabaseReference mMobileReference = FirebaseDatabase.getInstance().getReference(userTableName).child(userId);
+        DatabaseReference mMobileReference = FirebaseDatabase.getInstance().getReference(userTable).child(userId);
         mMobileReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {

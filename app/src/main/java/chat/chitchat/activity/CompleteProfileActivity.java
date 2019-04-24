@@ -22,7 +22,7 @@ import chat.chitchat.R;
 import chat.chitchat.helper.AppUtils;
 
 import static chat.chitchat.helper.AppConstant.mobileTableName;
-import static chat.chitchat.helper.AppConstant.userTableName;
+import static chat.chitchat.helper.AppConstant.userTable;
 import static chat.chitchat.helper.AppPrefrences.setFirebaseUserID;
 import static chat.chitchat.helper.AppPrefrences.setMobileNumber;
 import static chat.chitchat.helper.AppPrefrences.setUserLoggedOut;
@@ -49,7 +49,7 @@ public class CompleteProfileActivity extends AppCompatActivity {
         mobile = getIntent().getStringExtra("mobile");
 
         mMobileReference = FirebaseDatabase.getInstance().getReference(mobileTableName);
-        mUserReference = FirebaseDatabase.getInstance().getReference(userTableName).child(mAuth.getUid());
+        mUserReference = FirebaseDatabase.getInstance().getReference(userTable).child(mAuth.getUid());
 
         btn_finish.setOnClickListener(new View.OnClickListener() {
             @Override

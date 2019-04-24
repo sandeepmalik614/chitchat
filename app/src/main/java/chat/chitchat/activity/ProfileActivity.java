@@ -1,7 +1,6 @@
 package chat.chitchat.activity;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -48,7 +47,7 @@ import static chat.chitchat.helper.AppConstant.profileImageTable;
 import static chat.chitchat.helper.AppConstant.profileNameTable;
 import static chat.chitchat.helper.AppConstant.reportTableName;
 import static chat.chitchat.helper.AppConstant.uploadTableName;
-import static chat.chitchat.helper.AppConstant.userTableName;
+import static chat.chitchat.helper.AppConstant.userTable;
 import static chat.chitchat.helper.AppUtils.rotateImageIfRequired;
 import static chat.chitchat.helper.AppUtils.seeFullImage;
 import static chat.chitchat.helper.AppUtils.uploadImageToServer;
@@ -92,7 +91,7 @@ public class ProfileActivity extends AppCompatActivity {
         mUserNameReference = FirebaseDatabase.getInstance().getReference(profileNameTable);
         mUserImageReference = FirebaseDatabase.getInstance().getReference(profileImageTable);
         mUserStatusReference = FirebaseDatabase.getInstance().getReference(profileAboutTable);
-        mUserReference = FirebaseDatabase.getInstance().getReference(userTableName);
+        mUserReference = FirebaseDatabase.getInstance().getReference(userTable);
         mReportReference = FirebaseDatabase.getInstance().getReference(reportTableName);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override

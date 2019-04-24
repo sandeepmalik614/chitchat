@@ -34,7 +34,6 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
-import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -48,7 +47,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -68,11 +66,10 @@ import static chat.chitchat.helper.AppConstant.profileNameTable;
 import static chat.chitchat.helper.AppConstant.reportTableName;
 import static chat.chitchat.helper.AppConstant.uploadTableName;
 import static chat.chitchat.helper.AppConstant.userFriendListTableName;
-import static chat.chitchat.helper.AppConstant.userTableName;
+import static chat.chitchat.helper.AppConstant.userTable;
 import static chat.chitchat.helper.AppPrefrences.getUserName;
 import static chat.chitchat.helper.AppUtils.seeFullImage;
 import static chat.chitchat.helper.AppUtils.sendNotification;
-import static chat.chitchat.helper.AppUtils.updateGroupImage;
 import static chat.chitchat.helper.AppUtils.uploadImageToServer;
 import static chat.chitchat.helper.AppUtils.userStatus;
 
@@ -705,7 +702,7 @@ public class GroupProfile extends AppCompatActivity {
             }
         });
 
-        mDatabaseReference.child(userTableName).child(id).addValueEventListener(new ValueEventListener() {
+        mDatabaseReference.child(userTable).child(id).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 dialog_userPhone.setText(dataSnapshot.child("mobile").getValue().toString());

@@ -3,7 +3,6 @@ package chat.chitchat.fragment;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,7 +52,7 @@ import static chat.chitchat.helper.AppConstant.profileImageTable;
 import static chat.chitchat.helper.AppConstant.profileNameTable;
 import static chat.chitchat.helper.AppConstant.reportTableName;
 import static chat.chitchat.helper.AppConstant.userFriendListTableName;
-import static chat.chitchat.helper.AppConstant.userTableName;
+import static chat.chitchat.helper.AppConstant.userTable;
 import static chat.chitchat.helper.AppPrefrences.getUserName;
 import static chat.chitchat.helper.AppUtils.seeFullImage;
 import static chat.chitchat.helper.AppUtils.sendNotification;
@@ -207,7 +206,7 @@ public class FriendsFragment extends Fragment {
     }
 
     private void getAllUsers() {
-        mDatabaseReference.child(userTableName).addValueEventListener(new ValueEventListener() {
+        mDatabaseReference.child(userTable).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 suggestionIdList.clear();
@@ -432,7 +431,7 @@ public class FriendsFragment extends Fragment {
             }
         });
 
-        mDatabaseReference.child(userTableName).child(id).addValueEventListener(new ValueEventListener() {
+        mDatabaseReference.child(userTable).child(id).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 dialog_userPhone.setText(dataSnapshot.child("mobile").getValue().toString());

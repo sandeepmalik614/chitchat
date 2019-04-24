@@ -27,7 +27,6 @@ import chat.chitchat.listner.FriendClickListner;
 import chat.chitchat.model.ParticipantList;
 
 import static chat.chitchat.helper.AppConstant.userFriendListTableName;
-import static chat.chitchat.helper.AppConstant.userTableName;
 import static chat.chitchat.helper.AppUtils.userStatus;
 
 public class CreateGroupActivity extends AppCompatActivity {

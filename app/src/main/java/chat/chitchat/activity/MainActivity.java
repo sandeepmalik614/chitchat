@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,6 +21,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.StorageReference;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -39,10 +41,10 @@ import chat.chitchat.model.TokenList;
 import static chat.chitchat.helper.AppConstant.chatTableName;
 import static chat.chitchat.helper.AppConstant.mobileTableName;
 import static chat.chitchat.helper.AppConstant.tokenTableName;
+import static chat.chitchat.helper.AppConstant.uploadTableName;
 import static chat.chitchat.helper.AppPrefrences.getFirebaseToken;
 import static chat.chitchat.helper.AppPrefrences.setUserLoggedOut;
 import static chat.chitchat.helper.AppPrefrences.setUserName;
-import static chat.chitchat.helper.AppUtils.getMyPrettyDate;
 import static chat.chitchat.helper.AppUtils.isConnectionAvailable;
 import static chat.chitchat.helper.AppUtils.userStatus;
 
@@ -82,6 +84,13 @@ public class MainActivity extends AppCompatActivity {
             }, 100);
         }
 
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        String type = intent.getType();
+        if ("android.intent.action.SEND".equals(action) && type != null && "text/plain".equals(type)) {
+            Toast.makeText(this, ""+intent.getStringExtra("android.intent.extra.TEXT"), Toast.LENGTH_SHORT).show();
+        }
+        
         startInternetCycle();
     }
 

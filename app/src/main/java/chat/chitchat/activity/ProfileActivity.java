@@ -1,12 +1,15 @@
 package chat.chitchat.activity;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -38,6 +41,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import chat.chitchat.R;
 import chat.chitchat.helper.AppPrefrences;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -52,6 +58,7 @@ import static chat.chitchat.helper.AppUtils.rotateImageIfRequired;
 import static chat.chitchat.helper.AppUtils.seeFullImage;
 import static chat.chitchat.helper.AppUtils.uploadImageToServer;
 import static chat.chitchat.helper.AppUtils.userStatus;
+import static chat.chitchat.helper.RealPathUtil.getPath;
 
 
 public class ProfileActivity extends AppCompatActivity {
@@ -126,25 +133,29 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                CharSequence[] items = {"Gallery", "Remove profile pic"};
+                if (checkExternalStoragePermission()) {
+                    CharSequence[] items = {"Gallery", "Remove profile pic"};
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(ProfileActivity.this);
-                builder.setTitle("Select one");
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ProfileActivity.this);
+                    builder.setTitle("Select one");
 
-                builder.setItems(items, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int pos) {
-                        if (pos == 0) {
-                            Intent intent = new Intent();
-                            intent.setType("image/*");
-                            intent.setAction(Intent.ACTION_GET_CONTENT);
-                            startActivityForResult(Intent.createChooser(intent, "SELECT IMAGE"), IMAGE_REQUEST);
-                        }else if(pos == 1){
-                            removeProfilePic();
+                    builder.setItems(items, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int pos) {
+                            if (pos == 0) {
+                                Intent intent = new Intent();
+                                intent.setType("image/*");
+                                intent.setAction(Intent.ACTION_GET_CONTENT);
+                                startActivityForResult(Intent.createChooser(intent, "SELECT IMAGE"), IMAGE_REQUEST);
+                            }else if(pos == 1){
+                                removeProfilePic();
+                            }
                         }
-                    }
-                });
-                builder.show();
+                    });
+                    builder.show();
+                } else {
+                    requestExternalStoragePermission();
+                }
             }
         });
 
@@ -154,6 +165,57 @@ public class ProfileActivity extends AppCompatActivity {
                 seeFullImage(ProfileActivity.this, userImage, AppPrefrences.getUserImage(ProfileActivity.this), null);
             }
         });
+    }
+
+    private boolean checkExternalStoragePermission() {
+        int result = ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (result == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private void requestExternalStoragePermission() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            openUtilityDialog(this, "External Storage permission is required. Please allow this permission in App Settings.");
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1011);
+        }
+    }
+
+    private void openUtilityDialog(final Context ctx, final String messageID) {
+        android.app.AlertDialog.Builder dialog = new android.app.AlertDialog.Builder(ctx, R.style.Theme_AppCompat_Light);
+        dialog.setMessage(messageID);
+        dialog.setCancelable(false);
+        dialog.setPositiveButton("GO TO SETTINGS", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                Uri uri = Uri.fromParts("package", getPackageName(), null);
+                intent.setData(uri);
+                startActivity(intent);
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        switch (requestCode) {
+            case 0:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Intent galleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    startActivityForResult(galleryIntent, 0);
+                } else if (grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    openUtilityDialog(this, "You Have To Give Permission From Your Device Setting To go in Setting Please Click on Settings Button");
+                }
+                break;
+        }
+
     }
 
     private void getUserProfile() {
@@ -295,7 +357,7 @@ public class ProfileActivity extends AppCompatActivity {
             Bitmap bitmap = BitmapFactory.decodeStream(imageStream);
 
             try {
-                uploadImageToServer(this, rotateImageIfRequired(bitmap, this, selectedImage), false, firebaseUser.getUid());
+                uploadImageToServer(this, rotateImageIfRequired(bitmap, getPath(this, selectedImage)), false, firebaseUser.getUid());
             } catch (IOException e) {
                 e.printStackTrace();
             }

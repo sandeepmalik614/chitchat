@@ -473,37 +473,40 @@ public class AppUtils {
         context.startActivity(intent, options.toBundle());
     }
 
-    public static Bitmap rotateImageIfRequired(Bitmap img, Context context, Uri selectedImage) throws IOException {
+    public static Bitmap rotateImageIfRequired(Bitmap bitmap, String selectedImage) throws IOException {
+        ExifInterface ei = new ExifInterface(selectedImage);
+        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
 
-        if (selectedImage.getScheme().equals("content")) {
-            String[] projection = { MediaStore.Images.ImageColumns.ORIENTATION };
-            Cursor c = context.getContentResolver().query(selectedImage, projection, null, null, null);
-            if (c.moveToFirst()) {
-                final int rotation = c.getInt(0);
-                c.close();
-                return rotateImage(img, rotation);
-            }
-            return img;
-        } else {
-            ExifInterface ei = new ExifInterface(selectedImage.getPath());
-            int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-            switch (orientation) {
-                case ExifInterface.ORIENTATION_ROTATE_90:
-                    return rotateImage(img, 90);
-                case ExifInterface.ORIENTATION_ROTATE_180:
-                    return rotateImage(img, 180);
-                case ExifInterface.ORIENTATION_ROTATE_270:
-                    return rotateImage(img, 270);
-                default:
-                    return img;
-            }
+        switch (orientation) {
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                return rotate(bitmap, 90);
+
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                return rotate(bitmap, 180);
+
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                return rotate(bitmap, 270);
+
+            case ExifInterface.ORIENTATION_FLIP_HORIZONTAL:
+                return flip(bitmap, true, false);
+
+            case ExifInterface.ORIENTATION_FLIP_VERTICAL:
+                return flip(bitmap, false, true);
+
+            default:
+                return bitmap;
         }
     }
 
-    private static Bitmap rotateImage(Bitmap img, int degree) {
+    public static Bitmap rotate(Bitmap bitmap, float degrees) {
         Matrix matrix = new Matrix();
-        matrix.postRotate(degree);
-        Bitmap rotatedImg = Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(), matrix, true);
-        return rotatedImg;
+        matrix.postRotate(degrees);
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+    }
+
+    public static Bitmap flip(Bitmap bitmap, boolean horizontal, boolean vertical) {
+        Matrix matrix = new Matrix();
+        matrix.preScale(horizontal ? -1 : 1, vertical ? -1 : 1);
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }
 }

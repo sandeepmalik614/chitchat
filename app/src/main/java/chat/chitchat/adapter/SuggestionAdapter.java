@@ -18,6 +18,7 @@ import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import chat.chitchat.R;
 import chat.chitchat.helper.AppConstant;
 import chat.chitchat.helper.AppUtils;
@@ -105,12 +106,12 @@ public class SuggestionAdapter extends RecyclerView.Adapter<SuggestionAdapter.Vi
         holder.userImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(imageList.get(position).equals("default")){
+                if (imageList.get(position).equals("default")) {
                     if (friendClickListner != null) {
                         friendClickListner.onClick("suggestion", idList.get(position));
                     }
-                }else{
-                    AppUtils.seeFullImage(context, null, imageList.get(position), holder.userImage);
+                } else {
+
                 }
             }
         });
@@ -119,7 +120,15 @@ public class SuggestionAdapter extends RecyclerView.Adapter<SuggestionAdapter.Vi
 
     @Override
     public int getItemCount() {
-        return idList.size();
+        if (idList.size() != 0) {
+            if (idList.size() > 7) {
+                return 7;
+            } else {
+                return idList.size();
+            }
+        }else{
+            return 0;
+        }
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

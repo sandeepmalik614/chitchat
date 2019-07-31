@@ -359,4 +359,8 @@ public class MainActivity extends AppCompatActivity {
         }
         super.onUserLeaveHint();
     }
+
+    public void openSearch(View view) {
+        startActivity(new Intent(this, SearchActivity.class));
+    }
 }

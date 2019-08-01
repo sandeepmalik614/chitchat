@@ -358,6 +358,7 @@ public class UserMessageActivity extends AppCompatActivity {
                         assert chat != null;
                         if (chat.getReceiver().equals(myId) && chat.getSender().equals(userId) ||
                                 chat.getReceiver().equals(userId) && chat.getSender().equals(myId)) {
+                            chat.setMessageId(snapshot.getKey());
                             mChat.add(chat);
                         }
                         adapter = new MessageAdapter(UserMessageActivity.this, mChat);
@@ -417,6 +418,9 @@ public class UserMessageActivity extends AppCompatActivity {
         hashMap.put("message", message);
         hashMap.put("messageDate", timeInMilliseconds);
         hashMap.put("isseen", false);
+        hashMap.put("isEdited", false);
+        hashMap.put("deleteForMe", "");
+        hashMap.put("deleteForEveryone", "");
         SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm aaa");
         String time = dateFormat.format(new Date(System.currentTimeMillis()));
         hashMap.put("time", time);

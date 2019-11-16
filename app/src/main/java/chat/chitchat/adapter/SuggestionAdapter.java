@@ -25,6 +25,8 @@ import chat.chitchat.helper.AppUtils;
 import chat.chitchat.listner.BlockClickListner;
 import chat.chitchat.listner.FriendClickListner;
 
+import static chat.chitchat.helper.AppUtils.seeFullImage;
+
 
 public class SuggestionAdapter extends RecyclerView.Adapter<SuggestionAdapter.ViewHolder> {
 
@@ -75,7 +77,7 @@ public class SuggestionAdapter extends RecyclerView.Adapter<SuggestionAdapter.Vi
                     Glide.with(context).load(dataSnapshot.child("imageUrl").getValue().toString()).into(holder.userImage);
                 }
 
-                imageList.add(dataSnapshot.child("imageUrl").getValue().toString());
+                imageList.add(position, dataSnapshot.child("imageUrl").getValue().toString());
 
             }
 
@@ -111,7 +113,7 @@ public class SuggestionAdapter extends RecyclerView.Adapter<SuggestionAdapter.Vi
                         friendClickListner.onClick("suggestion", idList.get(position));
                     }
                 } else {
-
+                    seeFullImage(context, null, imageList.get(position), holder.userImage);
                 }
             }
         });
